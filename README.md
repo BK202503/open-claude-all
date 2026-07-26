@@ -32,14 +32,23 @@ Claude Code 에서 **PR 을 깔끔하게 올리고 기존 코드에 대한 임�
 
 ## Install
 
+가장 가벼운 방법 (Node 18+ 필요):
+
+```sh
+npx open-claude-all
+```
+
+옵션:
+- `npx open-claude-all --dry-run`: 실제 파일 안 만들고 뭐가 일어날지만 출력
+- `npx open-claude-all --skip-hook`: skill 만 설치, `branch-guard` hook 배선 생략
+- `npx open-claude-all uninstall`: 되돌리기
+
+Node 없이 쓰고 싶으면 clone 후 스크립트 직접 실행:
+
 ```sh
 git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all
 ~/.open-claude-all/install.sh
 ```
-
-옵션:
-- `--dry-run`: 실제 파일 안 만들고 뭐가 일어날지만 출력
-- `--skip-hook`: skill 만 설치, `branch-guard` hook 배선 생략
 
 Claude Code 세션 재시작 후 `/status` 로 skill 인식 확인.
 

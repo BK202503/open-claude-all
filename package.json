@@ -1,0 +1,37 @@
+{
+  "name": "open-claude-all",
+  "version": "0.1.0",
+  "description": "Claude Code skills and hooks for shipping clean PRs and pre-verifying impact on existing code.",
+  "bin": {
+    "open-claude-all": "bin/cli.mjs"
+  },
+  "files": [
+    "bin/",
+    "skills/",
+    "hooks/",
+    "install.sh",
+    "uninstall.sh",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BK202503/open-claude-all.git"
+  },
+  "homepage": "https://github.com/BK202503/open-claude-all",
+  "bugs": {
+    "url": "https://github.com/BK202503/open-claude-all/issues"
+  },
+  "keywords": [
+    "claude-code",
+    "claude",
+    "pr-review",
+    "skills",
+    "hooks"
+  ],
+  "license": "MIT",
+  "author": "Bill Kim <BK202503@users.noreply.github.com>"
+}
