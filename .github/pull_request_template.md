@@ -1,5 +1,5 @@
 ## Summary
-<what and why, 1–3 lines>
+<what and why, 1 to 3 lines>
 
 ## Base check
 - [ ] Targets `dev` (not `main`)

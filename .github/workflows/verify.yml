@@ -1,0 +1,53 @@
+name: verify
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+jobs:
+  install-dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure jq
+        run: which jq || sudo apt-get install -y jq
+      - name: install.sh --dry-run (with hook wiring)
+        run: bash install.sh --dry-run
+      - name: install.sh --skip-hook --dry-run
+        run: bash install.sh --skip-hook --dry-run
+      - name: uninstall.sh --dry-run
+        run: bash uninstall.sh --dry-run
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure shellcheck
+        run: which shellcheck || sudo apt-get install -y shellcheck
+      # Errors only for now; existing scripts have SC2294 warnings on
+      # `eval "$@"` that a future refactor can address.
+      - name: shellcheck (errors)
+        run: shellcheck --severity=error install.sh uninstall.sh hooks/*.sh
+
+  skill-frontmatter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify each skills/<name>/SKILL.md has name + description
+        run: |
+          set -u
+          fail=0
+          for dir in skills/*/; do
+            f="${dir}SKILL.md"
+            if [ ! -f "$f" ]; then
+              echo "MISSING: $f"
+              fail=1
+              continue
+            fi
+            head -1 "$f" | grep -q '^---$' || { echo "$f: does not start with '---'"; fail=1; }
+            grep -q '^name:' "$f"        || { echo "$f: missing 'name:' frontmatter key"; fail=1; }
+            grep -q '^description:' "$f" || { echo "$f: missing 'description:' frontmatter key"; fail=1; }
+          done
+          exit $fail
