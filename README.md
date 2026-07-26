@@ -1,6 +1,6 @@
 # open-claude-all
 
-Claude Code 에서 **PR 을 깔끔하게 올리고 기존 코드에 대한 임팩트를 미리 검증** 하는 데 초점 맞춘 skill / hook 모음. 개인·팀 사내 코드베이스 대상 — **OSS 업스트림 워크플로우 툴 아님**.
+Claude Code 에서 **PR 을 깔끔하게 올리고 기존 코드에 대한 임팩트를 미리 검증** 하는 데 초점 맞춘 skill / hook 모음.
 
 ## Why use this
 
@@ -71,8 +71,7 @@ Claude Code 세션 재시작 후 `/status` 로 skill 인식 확인.
 ## Non-goals
 
 - Claude Code core 재구현 / 대체
-- Multi-agent orchestration framework (그건 oh-my-claudecode 같은 프로젝트가 담당)
-- **OSS 업스트림 컨트리뷰션 워크플로우** — 이 툴킷은 사내 / 개인 코드베이스 PR 을 대상으로 함
+- Multi-agent orchestration framework
 - 모든 언어의 build / test wrapper — 프로젝트 자체 명령을 그대로 사용
 - 인터랙티브 오케스트레이션 UI
 
