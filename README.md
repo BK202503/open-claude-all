@@ -1,6 +1,11 @@
 # open-claude-all
 
+[![npm](https://img.shields.io/npm/v/open-claude-all.svg)](https://www.npmjs.com/package/open-claude-all)
+[![license](https://img.shields.io/npm/l/open-claude-all.svg)](LICENSE)
+
 Claude Code 에서 **PR 을 깔끔하게 올리고 기존 코드에 대한 임팩트를 미리 검증** 하는 데 초점 맞춘 skill / hook 모음.
+
+npm: https://www.npmjs.com/package/open-claude-all
 
 ## Why use this
 
