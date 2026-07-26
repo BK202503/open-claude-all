@@ -75,6 +75,10 @@ Claude Code 세션 재시작 후 `/status` 로 skill 인식 확인.
 - 모든 언어의 build / test wrapper — 프로젝트 자체 명령을 그대로 사용
 - 인터랙티브 오케스트레이션 UI
 
+## Contributing
+
+PR 은 `dev` 브랜치 대상. 상세 규칙은 [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## License
 
 MIT. See `LICENSE`.
