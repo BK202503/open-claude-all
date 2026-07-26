@@ -31,6 +31,26 @@ jobs:
       - name: shellcheck (errors)
         run: shellcheck --severity=error install.sh uninstall.sh hooks/*.sh
 
+  npm-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: npm pack
+        run: npm pack
+      - name: npx <tarball> --help
+        run: |
+          set -e
+          tarball="$(ls open-claude-all-*.tgz)"
+          npx -y "./${tarball}" --help
+      - name: npx <tarball> --dry-run --skip-hook
+        run: |
+          set -e
+          tarball="$(ls open-claude-all-*.tgz)"
+          npx -y "./${tarball}" --dry-run --skip-hook
+
   skill-frontmatter:
     runs-on: ubuntu-latest
     steps:
