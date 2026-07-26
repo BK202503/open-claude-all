@@ -86,7 +86,7 @@ Draft the impact-relevant sections the user should paste into the PR body:
 - **Test coverage** — "N new tests" / "existing tests updated" / "gap: <file> has no test"
 - **Migration required** — "none" / "config key <X> renamed, old key still read for 1 release with deprecation warning" / etc.
 
-Show the draft to the user. Do not open the PR — that's `oss-contribute` or the user's own workflow.
+Show the draft to the user. Do not open the PR — that's the user's own workflow (`gh pr create` after review).
 
 ## Non-goals
 

@@ -1,6 +1,6 @@
 ---
 name: parallel-dispatch
-description: When the user's message contains multiple INDEPENDENT tasks in one turn, fan out to N subagents in a single response instead of executing sequentially. Detects compound requests ("A 하고 B도 확인해줘", "이거 세 개 다", "kafka#22536 상태 보고 spring-kafka#4523 리뷰도 확인해줘") and routes each unit to the most specific worker (oss-pr-status, oss-router, general-purpose, ...). Triggers automatically whenever a single user turn has ≥ 2 independent actionable items. Skip when items depend on each other (must be sequential).
+description: When the user's message contains multiple INDEPENDENT tasks in one turn, fan out to N subagents in a single response instead of executing sequentially. Detects compound requests ("check A and also B", "이거 세 개 다", "look up X, grep for Y, and read Z") and routes each unit to the most specific worker (Explore, general-purpose, ...). Triggers automatically whenever a single user turn has ≥ 2 independent actionable items. Skip when items depend on each other (must be sequential).
 version: 0.1.0
 ---
 
@@ -32,37 +32,35 @@ For every independent unit, pick exactly one worker:
 
 | Unit shape | Worker |
 |---|---|
-| "check status of upstream PR / commit / issue" | Agent(`oss-pr-status`, prompt=<url>) |
-| "which OSS skill fits this?" (broad OSS ask) | Agent(`oss-router`, prompt=<request>) |
 | "look up file / grep / read" | Agent(`Explore`, prompt=<query>) |
-| Anything else that is a well-scoped research / analysis / summary | Agent(`general-purpose`, prompt=<unit>) |
+| Anything else that is a well-scoped read-only research / analysis / summary | Agent(`general-purpose`, prompt=<unit>) |
 
-If a unit needs a skill that only takes user-visible context (e.g. `oss-contribute` involves live user approval gates), do NOT parallelise it — hand it back to the parent as sequential.
+If a unit needs live user approval mid-flight (e.g. anything that will post to a shared surface — external comment, PR create, etc.), do NOT parallelise it — hand it back to the parent as sequential.
 
 ## Phase 3 — Emit all workers in ONE response
 
 Critical: emit every `Agent(...)` call in the same assistant response. Claude Code executes tool calls in the same response concurrently; splitting across responses is sequential.
 
-Concrete example. User says: "kafka#22536 상태 봐줘, spring-kafka#4523 리뷰도 확인해줘, 그리고 postgres btree_gist 커밋 상태도."
+Concrete example. User says: "grep for `PaymentIntent` in packages/api, list all TS files that import `date-fns`, and find where `MAX_RETRIES` is defined."
 
 Correct emission (one response, three tool calls):
 
 ```
-Agent(subagent_type="oss-pr-status", description="kafka#22536 status", prompt="https://github.com/apache/kafka/pull/22536")
-Agent(subagent_type="oss-pr-status", description="spring-kafka#4523 status", prompt="https://github.com/spring-projects/spring-kafka/issues/4523")
-Agent(subagent_type="oss-pr-status", description="postgres btree_gist commit", prompt="https://github.com/postgres/postgres/commit/7d3448961da3f8cb5c78b9d58c5e03b6bff53364")
+Agent(subagent_type="Explore", description="grep PaymentIntent", prompt="grep for symbol 'PaymentIntent' under packages/api and return file:line hits.")
+Agent(subagent_type="Explore", description="date-fns importers", prompt="Find every TS file that imports from 'date-fns'.")
+Agent(subagent_type="Explore", description="MAX_RETRIES definition", prompt="Find where MAX_RETRIES is defined and return the file:line and the value.")
 ```
 
 Incorrect — three separate responses:
 ```
-Response 1: Agent(oss-pr-status, kafka)
-Response 2: Agent(oss-pr-status, spring-kafka)
-Response 3: Agent(oss-pr-status, postgres)
+Response 1: Agent(Explore, PaymentIntent)
+Response 2: Agent(Explore, date-fns)
+Response 3: Agent(Explore, MAX_RETRIES)
 ```
 
 ## Phase 4 — Aggregate
 
-When all subagents return, produce ONE aggregated response for the user. Never regurgitate each subagent's raw output — group by outcome (needs-your-action / merged / idle / etc.) and put the most actionable bucket first.
+When all subagents return, produce ONE aggregated response for the user. Never regurgitate each subagent's raw output — group by outcome (found / not-found / errored) and put the most actionable bucket first.
 
 If any subagent errored, surface the error inline with the unit's label; do not retry silently.
 
@@ -90,5 +88,5 @@ If any subagent errored, surface the error inline with the unit's label; do not 
 
 - Single-task user turns.
 - Any user turn where ordering matters (all `then`, `after`, `if X`).
-- Tasks that require the user's live approval mid-flight (upstream PR post, site PR merge).
-- One-shot debugging where a fast Bash call in parent is cheaper than spawning a subagent.
+- Tasks that require the user's live approval mid-flight (posting to any shared / external surface).
+- One-shot lookups where a fast Bash call in parent is cheaper than spawning a subagent.
