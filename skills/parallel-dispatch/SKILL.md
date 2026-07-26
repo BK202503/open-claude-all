@@ -1,6 +1,6 @@
 ---
 name: parallel-dispatch
-description: When the user's message contains multiple INDEPENDENT tasks in one turn, fan out to N subagents in a single response instead of executing sequentially. Detects compound requests ("check A and also B", "이거 세 개 다", "look up X, grep for Y, and read Z") and routes each unit to the most specific worker (Explore, general-purpose, ...). Triggers automatically whenever a single user turn has ≥ 2 independent actionable items. Skip when items depend on each other (must be sequential).
+description: When the user's message contains multiple INDEPENDENT tasks in one turn, fan out to N subagents in a single response instead of executing sequentially. Detects compound requests ("check A and also B", "all three of these", "look up X, grep for Y, and read Z") and routes each unit to the most specific worker (Explore, general-purpose, ...). Triggers automatically whenever a single user turn has ≥ 2 independent actionable items. Skip when items depend on each other (must be sequential).
 version: 0.1.0
 ---
 
@@ -14,13 +14,13 @@ The default failure mode of the primary Claude is executing multi-task user turn
 
 Read the user's message and enumerate INDEPENDENT actionable items. Two items are independent if:
 - Neither reads the other's output.
-- The user's phrasing lists them as parallel (`A, B, C`, `X 하고 Y도`, `이거 다`).
+- The user's phrasing lists them as parallel (`A, B, C`, `X and also Y`, `all of these`).
 - Order does not matter for correctness.
 
 Items are NOT independent if:
 - Item B needs a value / decision from item A.
-- User uses sequencing words (`먼저 A 하고 그 다음 B`, `A 끝나면 B`).
-- Item B is a follow-up (`A 확인하고 문제 있으면 B`).
+- User uses sequencing words (`first A, then B`, `once A finishes, B`).
+- Item B is a follow-up (`check A, and if there's an issue, B`).
 
 If in doubt: sequential. Do NOT force parallelism when it introduces ordering risk.
 
