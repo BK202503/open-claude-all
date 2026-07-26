@@ -1,6 +1,6 @@
 ---
 name: parallel-dev
-description: When the user asks for MULTIPLE INDEPENDENT development features/tasks in one turn ("build A, B, C in parallel", "3개 병렬로 짜"), fan out to N general-purpose subagents — each in its own git worktree with strictly non-overlapping file scopes — then review and merge sequentially. Distinct from parallel-dispatch (which handles read-only status/lookup fan-out). Use this when the units require WRITES (code changes, migrations, new files).
+description: When the user asks for MULTIPLE INDEPENDENT development features/tasks in one turn ("build A, B, C in parallel", "spin up three features at once"), fan out to N general-purpose subagents, each in its own git worktree with strictly non-overlapping file scopes, then review and merge sequentially. Distinct from parallel-dispatch (which handles read-only status/lookup fan-out). Use this when the units require WRITES (code changes, migrations, new files).
 version: 0.1.0
 ---
 
@@ -17,7 +17,7 @@ The default failure mode is (a) implementing multi-feature requests sequentially
 
 Trigger when the user's turn contains ≥ 2 independent **development** units. Examples:
 - "build A, B, C in parallel with 3 agents"
-- "이 세 개 다 같이 짜"
+- "spin up all three of these features at once"
 
 Do NOT trigger when:
 - The task is read-only or lookup-heavy → use `parallel-dispatch` instead.

@@ -7,6 +7,43 @@ Claude Code skills and hooks focused on **shipping clean PRs and pre-verifying t
 
 npm: https://www.npmjs.com/package/open-claude-all
 
+## Install
+
+Three install paths. Pick whichever fits your environment.
+
+**A. `curl | bash` (no Node required)**
+
+```sh
+curl -fsSL https://bk202503.github.io/open-claude-all/get | bash
+```
+
+Downloads the latest `main` from GitHub and runs `install.sh`. Works on any POSIX shell (macOS, Linux, WSL). Forward flags after `bash -s --`, e.g.:
+
+```sh
+curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --dry-run
+curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --skip-hook
+```
+
+**B. `npx` (requires Node 18+)**
+
+```sh
+npx open-claude-all
+```
+
+Options:
+- `npx open-claude-all --dry-run`: print what would happen, change nothing.
+- `npx open-claude-all --skip-hook`: install skills only, skip `branch-guard` hook wiring.
+- `npx open-claude-all uninstall`: reverse the install.
+
+**C. Git clone (fully manual)**
+
+```sh
+git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all
+~/.open-claude-all/install.sh
+```
+
+After any path, restart your Claude Code session, then run `/status` to confirm the skills are picked up.
+
 ## Why use this
 
 Claude Code writes code fine on its own. What it tends to miss is what happens **right before that code goes out as a PR**:
@@ -35,27 +72,15 @@ Competing frameworks (oh-my-claudecode, claude-forge, etc.) focus mostly on "wri
 - `spring-kafka-listener-review`: catches known regression patterns around `DefaultErrorHandler`, `@RetryableTopic`, ack mode, DLT wiring, suspend `@KafkaListener` version gaps, and more.
 - `kotlin-coroutine-review`: structured-concurrency violations, blocking-in-suspend, dispatcher misuse, `GlobalScope` leaks, missing `CoroutineExceptionHandler`, and more.
 
-## Install
+### React / Next.js track
 
-Lightest path (requires Node 18+):
+- `react-hooks-review`: `useEffect` dep-array bugs, stale closures, functional-updater misses, over-memoization, list-key anti-patterns, async-effect cleanup leaks, silent Rules-of-Hooks violations.
+- `nextjs-app-router-review`: server / client component boundary mistakes, `fetch` cache and revalidate misuse, async `params` / `searchParams` in Next 15+, server-only secrets leaking into client bundles, hydration mismatches, route handler pitfalls.
+- `frontend-perf-impact-scan`: the frontend counterpart to `pr-impact-scan`. Enumerates concrete perf regressions in a diff (bundle bloat, LCP / CLS risks, network waterfalls, hydration mismatch surface) and ranks them Blocker / Watch / Nit before you PR.
 
-```sh
-npx open-claude-all
-```
+### NestJS track
 
-Options:
-- `npx open-claude-all --dry-run`: print what would happen, change nothing.
-- `npx open-claude-all --skip-hook`: install skills only, skip `branch-guard` hook wiring.
-- `npx open-claude-all uninstall`: reverse the install.
-
-If you would rather not use Node, clone the repo and run the scripts directly:
-
-```sh
-git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all
-~/.open-claude-all/install.sh
-```
-
-Restart your Claude Code session, then run `/status` to confirm the skills are picked up.
+- `nestjs-provider-review`: injection-scope misuse, circular deps hidden by `forwardRef`, missing module `exports`, exception-filter / interceptor / pipe / guard ordering pitfalls, async-provider typing gaps.
 
 ## Requires
 

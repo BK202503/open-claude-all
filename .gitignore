@@ -1,2 +1,25 @@
-*.tgz
+# npm / node
 node_modules/
+*.tgz
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+
+# env / secrets
+.env
+.env.*
+.npmrc
+
+# editors
+.vscode/
+.idea/
+*.swp
+
+# os
+.DS_Store
+Thumbs.db
+
+# build / coverage
+dist/
+build/
+coverage/
