@@ -9,7 +9,7 @@ npm: https://www.npmjs.com/package/open-claude-all
 
 ## Install
 
-Three install paths. Pick whichever fits your environment.
+Four install paths. Pick whichever fits your environment.
 
 **A. `curl | bash` (no Node required)**
 
@@ -53,6 +53,17 @@ Options:
 git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all
 ~/.open-claude-all/install.sh
 ```
+
+**D. Claude Code plugin marketplace** (recommended for Claude Code v2.1+ users)
+
+```sh
+/plugin marketplace add BK202503/open-claude-all
+/plugin install open-claude-all@open-claude-all
+```
+
+Auto-discovers skills + wires branch-guard hook. No shell script needed.
+
+This coexists with `install.sh` — pick whichever fits. The marketplace path handles updates via `/plugin update`; skills install namespaced as `/open-claude-all:<skill-name>`.
 
 After any path, restart your Claude Code session, then run `/status` to confirm the skills are picked up.
 
