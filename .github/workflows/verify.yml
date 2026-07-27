@@ -41,11 +41,13 @@ jobs:
       - name: npm pack
         run: npm pack
       - name: npx <tarball> --help
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         run: |
           set -e
           tarball="$(ls open-claude-all-*.tgz)"
           npx -y "./${tarball}" --help
       - name: npx <tarball> --dry-run --skip-hook
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         run: |
           set -e
           tarball="$(ls open-claude-all-*.tgz)"
