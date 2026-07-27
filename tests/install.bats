@@ -15,9 +15,12 @@ setup() {
 @test "install.sh --dry-run --skip-hook exits 0 and does not wire settings.json" {
     run bash "$REPO_ROOT/install.sh" --dry-run --skip-hook
     [ "$status" -eq 0 ]
-    [[ "$output" != *"wiring branch-guard into"* ]]
-    [[ "$output" != *"would merge branch-guard hook into settings.json"* ]]
-    [[ "$output" == *"--skip-hook"* ]]
+    # Positive: skip path prints an explicit "not wiring" line.
+    [[ "$output" == *"not wiring branch-guard"* ]]
+    # Negative: none of the actual wiring signals appear.
+    [[ "$output" != *"would merge branch-guard hook"* ]]
+    [[ "$output" != *"branch-guard-like hook already present"* ]]
+    [[ "$output" != *"    wired."* ]]
 }
 
 @test "install.sh --help prints usage and exits 0" {
