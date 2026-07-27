@@ -24,6 +24,18 @@ curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --dry-run
 curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --skip-hook
 ```
 
+*Pinning to a release tag.* `curl | bash` against a moving `main` is a supply-chain risk — you get whatever HEAD looks like at fetch time. Once release tags exist, pin explicitly:
+
+```sh
+# via get.sh (planned; OCA_REF support is not yet wired in the get endpoint):
+OCA_REF=v0.1.3 curl -fsSL https://bk202503.github.io/open-claude-all/get | bash
+
+# direct from GitHub at a tag (works today, once the tag is pushed):
+curl -fsSL https://raw.githubusercontent.com/BK202503/open-claude-all/v0.1.3/install.sh | bash
+```
+
+For the npm path, pin the version explicitly: `npx open-claude-all@0.1.3`.
+
 **B. `npx` (requires Node 18+)**
 
 ```sh
@@ -66,6 +78,17 @@ Competing frameworks (oh-my-claudecode, claude-forge, etc.) focus mostly on "wri
 - `parallel-dispatch`: parallel read (status / lookup) fan-out.
 - `parallel-dev`: worktree-isolated parallel development (write).
 - `branch-guard`: block direct writes to `main` / `master` / `trunk` (backed by a PreToolUse hook).
+
+### `parallel-dispatch` vs `parallel-dev` — when to use which
+
+Same "fan out N subagents in one response" shape, different safety envelope.
+
+- **Read fan-out → `parallel-dispatch`.** No worktree, no writes, no isolation. Example:
+  - *"Check the status of PR #22536, #4523, and #18103 in parallel"* → three read-only subagents fan out, each calls `gh pr view`, results are aggregated in one reply.
+- **Write fan-out → `parallel-dev`.** Each unit gets its own git worktree, file scopes must be non-overlapping, and the parent merges branches back sequentially after reviewing each diff. Example:
+  - *"Build the login page, the settings page, and the API client at once"* → three worktree-isolated `general-purpose` agents, disjoint directories, sequential `--no-ff` merge back to base.
+
+Rule of thumb: if any unit writes to disk, use `parallel-dev`. If every unit is read-only, use `parallel-dispatch`.
 
 ### Kotlin / JVM Spring track
 
