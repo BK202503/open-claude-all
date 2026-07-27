@@ -116,6 +116,13 @@ Rule of thumb: if any unit writes to disk, use `parallel-dev`. If every unit is 
 
 - `nestjs-provider-review`: injection-scope misuse, circular deps hidden by `forwardRef`, missing module `exports`, exception-filter / interceptor / pipe / guard ordering pitfalls, async-provider typing gaps.
 
+### Agents
+
+Agents wrap the skills above for one-shot invocation against a concrete PR.
+
+- `pr-reviewer`: opinionated PR reviewer aligned with this repo's clean-PR philosophy. Checks scope discipline, impact enumeration, commit hygiene, and AI-attribution rules. Ranks findings Blocker / Watch / Nit.
+- `pr-impact-runner`: thin dispatcher over `pr-impact-scan`. Takes a PR URL, fetches the diff, runs the impact-scan flow, returns a compact ranked report.
+
 ## Requires
 
 - Claude Code v2.1+ (skills / hooks support).
