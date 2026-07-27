@@ -61,9 +61,10 @@ deny_or_allow() {
     exit 2
 }
 
-# Read tool call JSON from stdin
-payload="$(cat)"
-file_path="$(echo "$payload" | /usr/bin/env python3 -c 'import json,sys;d=json.load(sys.stdin);print(d.get("tool_input",{}).get("file_path",""))' 2>/dev/null || echo "")"
+# Read tool call JSON from stdin — cap at 1 MiB so a malformed / oversized
+# payload cannot exhaust memory before python's json.load bails out.
+payload="$(head -c 1048576)"
+file_path="$(printf '%s' "$payload" | /usr/bin/env python3 -c 'import json,sys;d=json.load(sys.stdin);print(d.get("tool_input",{}).get("file_path",""))' 2>/dev/null || echo "")"
 
 if [ -z "$file_path" ]; then
     deny_or_allow "" "no file_path in tool input"
@@ -77,7 +78,7 @@ else
 fi
 
 # Not in a git repo? default fail-open; strict: block unless allowlisted.
-branch="$(cd "$target_dir" 2>/dev/null && git rev-parse --abbrev-ref HEAD 2>/dev/null)" \
+branch="$(cd -- "$target_dir" 2>/dev/null && git rev-parse --abbrev-ref HEAD 2>/dev/null)" \
     || deny_or_allow "$file_path" "target is not inside a git repo"
 
 if [ -z "$branch" ]; then
