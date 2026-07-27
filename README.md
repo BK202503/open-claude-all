@@ -9,63 +9,72 @@ npm: https://www.npmjs.com/package/open-claude-all
 
 ## Install
 
-Four install paths. Pick whichever fits your environment.
+Four install paths, ordered from most managed to most manual. Pick one.
 
-**A. `curl | bash` (no Node required)**
+| # | Path | Requires | Best for |
+| :-: | --- | --- | --- |
+| 1 | Claude Code plugin marketplace | Claude Code v2.1+ | most users — managed updates |
+| 2 | `npx` | Node 18+ | quick one-shot install |
+| 3 | `curl \| bash` | POSIX shell | no-Node environments |
+| 4 | Git clone | git | you want to read the source first |
 
-```sh
-curl -fsSL https://bk202503.github.io/open-claude-all/get | bash
-```
+After any path, restart Claude Code, then run `/status` to confirm skills are picked up.
 
-Downloads the latest `main` from GitHub and runs `install.sh`. Works on any POSIX shell (macOS, Linux, WSL). Forward flags after `bash -s --`, e.g.:
-
-```sh
-curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --dry-run
-curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --skip-hook
-```
-
-*Pinning to a release tag.* `curl | bash` against a moving `main` is a supply-chain risk — you get whatever HEAD looks like at fetch time. Once release tags exist, pin explicitly:
-
-```sh
-# via get.sh (planned; OCA_REF support is not yet wired in the get endpoint):
-OCA_REF=v0.1.3 curl -fsSL https://bk202503.github.io/open-claude-all/get | bash
-
-# direct from GitHub at a tag (works today, once the tag is pushed):
-curl -fsSL https://raw.githubusercontent.com/BK202503/open-claude-all/v0.1.3/install.sh | bash
-```
-
-For the npm path, pin the version explicitly: `npx open-claude-all@0.1.3`.
-
-**B. `npx` (requires Node 18+)**
-
-```sh
-npx open-claude-all
-```
-
-Options:
-- `npx open-claude-all --dry-run`: print what would happen, change nothing.
-- `npx open-claude-all --skip-hook`: install skills only, skip `branch-guard` hook wiring.
-- `npx open-claude-all uninstall`: reverse the install.
-
-**C. Git clone (fully manual)**
-
-```sh
-git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all
-~/.open-claude-all/install.sh
-```
-
-**D. Claude Code plugin marketplace** (recommended for Claude Code v2.1+ users)
+### 1. Claude Code plugin marketplace *(recommended)*
 
 ```sh
 /plugin marketplace add BK202503/open-claude-all
 /plugin install open-claude-all@open-claude-all
 ```
 
-Auto-discovers skills + wires branch-guard hook. No shell script needed.
+Auto-discovers skills, wires the `branch-guard` hook, and gets updates via `/plugin update`. Skills namespace as `/open-claude-all:<skill-name>`.
 
-This coexists with `install.sh` — pick whichever fits. The marketplace path handles updates via `/plugin update`; skills install namespaced as `/open-claude-all:<skill-name>`.
+### 2. `npx`
 
-After any path, restart your Claude Code session, then run `/status` to confirm the skills are picked up.
+```sh
+npx open-claude-all               # install
+npx open-claude-all --dry-run     # preview only, change nothing
+npx open-claude-all --skip-hook   # skills only, skip branch-guard wiring
+npx open-claude-all uninstall     # reverse the install
+```
+
+Pin the version: `npx open-claude-all@0.1.3`.
+
+### 3. `curl | bash`
+
+```sh
+curl -fsSL https://bk202503.github.io/open-claude-all/get | bash
+```
+
+Downloads the latest `main` and runs `install.sh` on any POSIX shell (macOS, Linux, WSL). Forward flags after `bash -s --`:
+
+```sh
+curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --dry-run
+curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --skip-hook
+```
+
+Against a moving `main`, this is a supply-chain risk. See [Pinning to a release](#pinning-to-a-release) below.
+
+### 4. Git clone
+
+```sh
+git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all
+~/.open-claude-all/install.sh
+```
+
+### Pinning to a release
+
+`curl | bash` and `git clone` both track `main` by default. To pin:
+
+```sh
+# direct from GitHub at a tag (works once the tag is pushed):
+curl -fsSL https://raw.githubusercontent.com/BK202503/open-claude-all/v0.1.3/install.sh | bash
+
+# via get.sh (planned; OCA_REF support is not yet wired in the get endpoint):
+OCA_REF=v0.1.3 curl -fsSL https://bk202503.github.io/open-claude-all/get | bash
+```
+
+For npm: `npx open-claude-all@0.1.3`. For the marketplace path, `/plugin update` pulls the latest published version.
 
 ## Why use this
 

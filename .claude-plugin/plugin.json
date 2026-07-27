@@ -1,5 +1,6 @@
 {
   "name": "open-claude-all",
+  "version": "0.1.3",
   "description": "Claude Code skills and hooks focused on shipping clean PRs and pre-verifying the impact on existing code.",
   "author": {
     "name": "BK202503",
