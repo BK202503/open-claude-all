@@ -114,6 +114,10 @@ Rule of thumb: if any unit writes to disk, use `parallel-dev`. If every unit is 
 
 - `WW_PROTECTED_BRANCHES`: branches `branch-guard` blocks. Default `main,master,trunk`.
 - `WW_ALLOW_MAIN_WRITE=1`: temporary bypass for `branch-guard` (CI / setup scripts).
+- `WW_STRICT=1`: fail-closed mode for `branch-guard`. Payloads with no `file_path`, targets outside a git repo, and unresolvable branches are **blocked** instead of allowed. Combine with `WW_STRICT_ALLOWLIST` to whitelist known-safe sinks.
+- `WW_STRICT_ALLOWLIST`: colon-separated path prefixes that stay allowed under `WW_STRICT=1`. Default `$HOME/.claude:/tmp:/var/tmp`.
+
+Default is fail-open (unchanged): if `branch-guard` cannot resolve the target's git branch, the write proceeds. Set `WW_STRICT=1` in environments where "unknown = deny" is the right policy (shared machines, CI sandboxes, review workflows).
 
 ## Uninstall
 
