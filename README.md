@@ -9,7 +9,7 @@ npm: https://www.npmjs.com/package/open-claude-all
 
 ## Install
 
-Three install paths. Pick whichever fits your environment.
+Four install paths. Pick whichever fits your environment.
 
 **A. `curl | bash` (no Node required)**
 
@@ -23,6 +23,18 @@ Downloads the latest `main` from GitHub and runs `install.sh`. Works on any POSI
 curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --dry-run
 curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --skip-hook
 ```
+
+*Pinning to a release tag.* `curl | bash` against a moving `main` is a supply-chain risk — you get whatever HEAD looks like at fetch time. Once release tags exist, pin explicitly:
+
+```sh
+# via get.sh (planned; OCA_REF support is not yet wired in the get endpoint):
+OCA_REF=v0.1.3 curl -fsSL https://bk202503.github.io/open-claude-all/get | bash
+
+# direct from GitHub at a tag (works today, once the tag is pushed):
+curl -fsSL https://raw.githubusercontent.com/BK202503/open-claude-all/v0.1.3/install.sh | bash
+```
+
+For the npm path, pin the version explicitly: `npx open-claude-all@0.1.3`.
 
 **B. `npx` (requires Node 18+)**
 
@@ -41,6 +53,17 @@ Options:
 git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all
 ~/.open-claude-all/install.sh
 ```
+
+**D. Claude Code plugin marketplace** (recommended for Claude Code v2.1+ users)
+
+```sh
+/plugin marketplace add BK202503/open-claude-all
+/plugin install open-claude-all@open-claude-all
+```
+
+Auto-discovers skills + wires branch-guard hook. No shell script needed.
+
+This coexists with `install.sh` — pick whichever fits. The marketplace path handles updates via `/plugin update`; skills install namespaced as `/open-claude-all:<skill-name>`.
 
 After any path, restart your Claude Code session, then run `/status` to confirm the skills are picked up.
 
@@ -67,6 +90,17 @@ Competing frameworks (oh-my-claudecode, claude-forge, etc.) focus mostly on "wri
 - `parallel-dev`: worktree-isolated parallel development (write).
 - `branch-guard`: block direct writes to `main` / `master` / `trunk` (backed by a PreToolUse hook).
 
+### `parallel-dispatch` vs `parallel-dev` — when to use which
+
+Same "fan out N subagents in one response" shape, different safety envelope.
+
+- **Read fan-out → `parallel-dispatch`.** No worktree, no writes, no isolation. Example:
+  - *"Check the status of PR #22536, #4523, and #18103 in parallel"* → three read-only subagents fan out, each calls `gh pr view`, results are aggregated in one reply.
+- **Write fan-out → `parallel-dev`.** Each unit gets its own git worktree, file scopes must be non-overlapping, and the parent merges branches back sequentially after reviewing each diff. Example:
+  - *"Build the login page, the settings page, and the API client at once"* → three worktree-isolated `general-purpose` agents, disjoint directories, sequential `--no-ff` merge back to base.
+
+Rule of thumb: if any unit writes to disk, use `parallel-dev`. If every unit is read-only, use `parallel-dispatch`.
+
 ### Kotlin / JVM Spring track
 
 - `spring-kafka-listener-review`: catches known regression patterns around `DefaultErrorHandler`, `@RetryableTopic`, ack mode, DLT wiring, suspend `@KafkaListener` version gaps, and more.
@@ -82,6 +116,13 @@ Competing frameworks (oh-my-claudecode, claude-forge, etc.) focus mostly on "wri
 
 - `nestjs-provider-review`: injection-scope misuse, circular deps hidden by `forwardRef`, missing module `exports`, exception-filter / interceptor / pipe / guard ordering pitfalls, async-provider typing gaps.
 
+### Agents
+
+Agents wrap the skills above for one-shot invocation against a concrete PR.
+
+- `pr-reviewer`: opinionated PR reviewer aligned with this repo's clean-PR philosophy. Checks scope discipline, impact enumeration, commit hygiene, and AI-attribution rules. Ranks findings Blocker / Watch / Nit.
+- `pr-impact-runner`: thin dispatcher over `pr-impact-scan`. Takes a PR URL, fetches the diff, runs the impact-scan flow, returns a compact ranked report.
+
 ## Requires
 
 - Claude Code v2.1+ (skills / hooks support).
@@ -91,6 +132,10 @@ Competing frameworks (oh-my-claudecode, claude-forge, etc.) focus mostly on "wri
 
 - `WW_PROTECTED_BRANCHES`: branches `branch-guard` blocks. Default `main,master,trunk`.
 - `WW_ALLOW_MAIN_WRITE=1`: temporary bypass for `branch-guard` (CI / setup scripts).
+- `WW_STRICT=1`: fail-closed mode for `branch-guard`. Payloads with no `file_path`, targets outside a git repo, and unresolvable branches are **blocked** instead of allowed. Combine with `WW_STRICT_ALLOWLIST` to whitelist known-safe sinks.
+- `WW_STRICT_ALLOWLIST`: colon-separated path prefixes that stay allowed under `WW_STRICT=1`. Default `$HOME/.claude:/tmp:/var/tmp`.
+
+Default is fail-open (unchanged): if `branch-guard` cannot resolve the target's git branch, the write proceeds. Set `WW_STRICT=1` in environments where "unknown = deny" is the right policy (shared machines, CI sandboxes, review workflows).
 
 ## Uninstall
 
