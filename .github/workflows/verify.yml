@@ -51,6 +51,18 @@ jobs:
           tarball="$(ls open-claude-all-*.tgz)"
           npx -y "./${tarball}" --dry-run --skip-hook
 
+  bats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure jq
+        run: which jq || sudo apt-get install -y jq
+      - name: Install bats (best effort)
+        continue-on-error: true
+        run: which bats || sudo apt-get install -y bats
+      - name: Run bats suite
+        run: bats tests/
+
   skill-frontmatter:
     runs-on: ubuntu-latest
     steps:
