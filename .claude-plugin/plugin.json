@@ -1,0 +1,8 @@
+{
+  "name": "open-claude-all",
+  "description": "Claude Code skills and hooks focused on shipping clean PRs and pre-verifying the impact on existing code.",
+  "author": {
+    "name": "Bill Kim",
+    "url": "https://github.com/BK202503"
+  }
+}
