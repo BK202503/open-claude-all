@@ -27,33 +27,42 @@ done
 repo_root="$(cd "$(dirname "$0")" && pwd)"
 claude_dir="$HOME/.claude"
 
+# run: execute argv directly (no eval / no shell reparse).
+# For DRY, print a shell-quoted preview of what would run.
 run() {
-    if [ "$DRY" = 1 ]; then echo "DRY: $*"; else eval "$@"; fi
+    if [ "$DRY" = 1 ]; then
+        printf 'DRY:'
+        printf ' %q' "$@"
+        printf '\n'
+    else
+        "$@"
+    fi
 }
 
 echo "==> installing to $claude_dir"
-run "mkdir -p '$claude_dir/skills' '$claude_dir/agents' '$claude_dir/hooks'"
+run mkdir -p "$claude_dir/skills" "$claude_dir/agents" "$claude_dir/hooks"
 
 echo "==> skills"
+shopt -s nullglob
 for src in "$repo_root/skills/"*/; do
     name="$(basename "$src")"
     dst="$claude_dir/skills/$name"
     if [ -d "$dst" ]; then
         echo "    skill '$name' already present — merging (rsync)."
     fi
-    run "rsync -a --delete '$src' '$dst/'"
+    run rsync -a --delete "$src" "$dst/"
 done
 
 echo "==> agents"
 for src in "$repo_root/agents/"*.md; do
-    [ -e "$src" ] || continue
     name="$(basename "$src")"
-    run "cp '$src' '$claude_dir/agents/$name'"
+    run cp "$src" "$claude_dir/agents/$name"
 done
+shopt -u nullglob
 
 echo "==> hooks"
-run "cp '$repo_root/hooks/branch-guard.sh' '$claude_dir/hooks/branch-guard.sh'"
-run "chmod +x '$claude_dir/hooks/branch-guard.sh'"
+run cp "$repo_root/hooks/branch-guard.sh" "$claude_dir/hooks/branch-guard.sh"
+run chmod +x "$claude_dir/hooks/branch-guard.sh"
 
 if [ "$SKIP_HOOK" = 1 ]; then
     echo "==> --skip-hook — not wiring branch-guard into settings.json"
@@ -62,7 +71,11 @@ fi
 
 echo "==> wiring branch-guard into $claude_dir/settings.json"
 if [ ! -f "$claude_dir/settings.json" ]; then
-    run "echo '{}' > '$claude_dir/settings.json'"
+    if [ "$DRY" = 1 ]; then
+        echo "DRY: init empty settings.json at $claude_dir/settings.json"
+    else
+        printf '{}\n' > "$claude_dir/settings.json"
+    fi
 fi
 
 # Add branch-guard hook if not already present.
@@ -87,10 +100,10 @@ already="$(jq '.hooks.PreToolUse // [] | map(select(.matcher // "" | contains("W
 if [ "$already" != "0" ]; then
     echo "    branch-guard-like hook already present — not modifying settings.json"
 else
-    tmp="$(mktemp)"
     if [ "$DRY" = 1 ]; then
-        echo "DRY: would merge branch-guard hook into settings.json"
+        echo "DRY: would merge branch-guard hook into $claude_dir/settings.json"
     else
+        tmp="$(mktemp)"
         jq '. + {hooks: ((.hooks // {}) + {PreToolUse: (((.hooks // {}).PreToolUse // []) + [{
             matcher: "Write|Edit|MultiEdit|NotebookEdit",
             hooks: [{ type: "command", command: ("\(env.HOME)/.claude/hooks/branch-guard.sh") }]
