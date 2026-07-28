@@ -1,0 +1,16 @@
+{
+  // setCount(count + 1) inside setInterval reads `count` from the initial render.
+  // Correct fix is functional updater: setCount(c => c + 1). Adding `count` to
+  // deps would recreate the interval each tick — wrong. This makes the
+  // functional-updater framing the strictly correct one, though a review that
+  // flags it as stale-closure / missing-dep is also detecting the same defect.
+  "must_flag": [
+    {
+      "line": 8,
+      "category": ["functional-updater", "stale-closure", "missing-dep"],
+      "hint": "use setCount(c => c + 1) — adding `count` to deps recreates the interval"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Functional-updater case. Multi-category accept because the same defect has three defensible framings."
+}

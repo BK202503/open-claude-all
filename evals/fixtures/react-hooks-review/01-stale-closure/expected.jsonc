@@ -1,0 +1,14 @@
+{
+  // useCallback with empty deps captures the initial (0) count and onCommit.
+  // Every click adds 1 to 0 instead of incrementing. Two acceptable framings:
+  // "stale-closure" (semantic) or "missing-dep" (mechanical). Either counts.
+  "must_flag": [
+    {
+      "line": 10,
+      "category": ["stale-closure", "missing-dep"],
+      "hint": "useCallback deps missing count, onCommit"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Minimal stale-closure via missing useCallback deps. Either category label acceptable."
+}
