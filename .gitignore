@@ -23,3 +23,6 @@ Thumbs.db
 dist/
 build/
 coverage/
+
+# eval run outputs
+evals/results/

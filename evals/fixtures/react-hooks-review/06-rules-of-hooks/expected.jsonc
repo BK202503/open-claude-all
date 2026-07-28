@@ -1,0 +1,16 @@
+{
+  // Hook (useState) is called after a conditional early return. On renders
+  // where featureEnabled is false, the hook is skipped; on renders where it
+  // flips true, hook order changes and React throws "rendered fewer hooks".
+  // eslint-plugin-react-hooks catches this — a good review should still flag
+  // it as a Rules-of-Hooks violation regardless.
+  "must_flag": [
+    {
+      "line": 10,
+      "category": ["rules-of-hooks"],
+      "hint": "useState called after `if (...) return null` — hook order not stable"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Classic conditional hook via early return."
+}

@@ -1,0 +1,18 @@
+{
+  // Deps are correct — [query]. The defect is race + setState-after-unmount:
+  // rapid query changes fire overlapping fetches; an older response can
+  // resolve after a newer one and clobber it (or land after unmount).
+  // Needs AbortController or an ignore/mounted-ref pattern in cleanup.
+  "must_flag": [
+    {
+      "line": 11,
+      "category": ["async-cleanup"],
+      "hint": "fetch with no AbortController; setResults can race or fire post-unmount"
+    }
+  ],
+  "must_not_flag": [
+    // key={r} on line 19 uses the actual string value, not an index — fine.
+    // Do not flag it as key-antipattern.
+  ],
+  "notes": "Isolates async-cleanup from missing-dep (deps here are correct)."
+}
