@@ -1,0 +1,22 @@
+{
+  // Live dashboard fetches "/metrics/live" with no cache options — App Router
+  // defaults this to full-route cache (SSG-like), so the dashboard is frozen.
+  // The second fetch on line 16 IS correctly configured with
+  // { next: { revalidate: 3600 } } for a slowly-changing regions list; the
+  // skill should NOT flag it.
+  "must_flag": [
+    {
+      "line": 12,
+      "category": ["missing-cache-directive"],
+      "hint": "fetch(metrics/live) with no cache/revalidate on a live dashboard"
+    }
+  ],
+  "must_not_flag": [
+    {
+      "line": 16,
+      "category": ["missing-cache-directive", "revalidate-misuse"],
+      "hint": "regions fetch is intentionally revalidated hourly — do not flag"
+    }
+  ],
+  "notes": "Isolates missing-cache-directive from a correctly-cached sibling fetch. The skill must distinguish them."
+}

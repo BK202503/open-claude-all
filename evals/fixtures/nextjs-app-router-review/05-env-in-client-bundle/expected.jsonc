@@ -1,0 +1,16 @@
+{
+  // "use client" file reads process.env.API_URL (no NEXT_PUBLIC_ prefix).
+  // In the client bundle this is undefined; the ?? fallback silently swaps
+  // in localhost, so prod requests go to the wrong origin with no error.
+  // Fix: rename the env var to NEXT_PUBLIC_API_URL (and update wherever it
+  // is set), or pass it through a server component prop.
+  "must_flag": [
+    {
+      "line": 13,
+      "category": ["env-in-client-bundle"],
+      "hint": "process.env.API_URL in a \"use client\" file — needs NEXT_PUBLIC_ prefix"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Isolates env-in-client-bundle from broader server-only imports; the only defect is the env var name."
+}

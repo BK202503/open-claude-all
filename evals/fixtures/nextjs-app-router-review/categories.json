@@ -1,0 +1,14 @@
+{
+  "categories": [
+    "use-client-secret-leak",
+    "missing-cache-directive",
+    "async-params-sync-access",
+    "route-handler-plain-return",
+    "env-in-client-bundle",
+    "hooks-in-server-component",
+    "unbound-middleware-heavy",
+    "cookies-in-static-route",
+    "server-only-import-in-client",
+    "revalidate-misuse"
+  ]
+}

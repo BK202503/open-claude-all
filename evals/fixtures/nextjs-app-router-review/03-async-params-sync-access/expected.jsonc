@@ -1,0 +1,21 @@
+{
+  // params is typed Promise<{id}> (Next 15) but line 17 uses params.id
+  // synchronously. That interpolates "[object Promise]" into the URL and
+  // silently 404s. Correct fix: `const { id } = await params;` before use.
+  // searchParams is correctly awaited on line 23 — do not flag it.
+  "must_flag": [
+    {
+      "line": 17,
+      "category": ["async-params-sync-access"],
+      "hint": "params.id used synchronously in a Next 15 page (params is a Promise)"
+    }
+  ],
+  "must_not_flag": [
+    {
+      "line": 23,
+      "category": ["async-params-sync-access"],
+      "hint": "searchParams is correctly awaited — do not flag"
+    }
+  ],
+  "notes": "Next 15 shape declared via params: Promise<...>. Sync access is the defect."
+}
