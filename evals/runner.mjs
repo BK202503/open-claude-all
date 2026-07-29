@@ -24,7 +24,10 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const FIXTURES_DIR = join(REPO_ROOT, "evals", "fixtures");
 const RESULTS_DIR = join(REPO_ROOT, "evals", "results");
 
-const CANONICAL_CATEGORIES = [
+// Categories are defined per-skill in evals/fixtures/<skill>/categories.json.
+// Falls back to this list if the file is absent (kept for the original react
+// skill so existing fixtures still work before the categories file is added).
+const FALLBACK_CATEGORIES = [
   "missing-dep",
   "stale-closure",
   "functional-updater",
@@ -36,6 +39,21 @@ const CANONICAL_CATEGORIES = [
 ];
 
 const LINE_TOLERANCE = 3;
+
+async function loadCategoriesForSkill(skillName) {
+  const path = join(FIXTURES_DIR, skillName, "categories.json");
+  try {
+    const raw = await readFile(path, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed.categories) || parsed.categories.length === 0) {
+      throw new Error(`${path}: "categories" must be a non-empty array of strings`);
+    }
+    return parsed.categories;
+  } catch (err) {
+    if (err.code === "ENOENT") return FALLBACK_CATEGORIES;
+    throw err;
+  }
+}
 
 function parseCliArgs() {
   const { values } = parseArgs({
@@ -152,7 +170,7 @@ async function reviewWithSkill({ fixture, skillName, budgetUsd, verbose, strictA
   return extractAssistantText(stdout);
 }
 
-async function extractFindings({ reviewText, budgetUsd, verbose, strictAuth, model }) {
+async function extractFindings({ reviewText, categories, budgetUsd, verbose, strictAuth, model }) {
   const schema = {
     type: "object",
     properties: {
@@ -162,7 +180,7 @@ async function extractFindings({ reviewText, budgetUsd, verbose, strictAuth, mod
           type: "object",
           properties: {
             line: { type: "integer" },
-            category: { type: "string", enum: CANONICAL_CATEGORIES },
+            category: { type: "string", enum: categories },
             snippet: { type: "string" },
           },
           required: ["line", "category"],
@@ -174,7 +192,7 @@ async function extractFindings({ reviewText, budgetUsd, verbose, strictAuth, mod
   const prompt =
     `Extract structured findings from this code review. ` +
     `For each issue mentioned, emit {line, category, snippet}. ` +
-    `Categories must be one of: ${CANONICAL_CATEGORIES.join(", ")}. ` +
+    `Categories must be one of: ${categories.join(", ")}. ` +
     `If a mentioned issue does not clearly fit any category, pick the closest match. ` +
     `Do not invent findings that the review did not mention.\n\n` +
     `Review:\n${reviewText}`;
@@ -282,6 +300,7 @@ async function main() {
 
   for (const skillName of skills) {
     const skillDir = join(FIXTURES_DIR, skillName);
+    const categories = await loadCategoriesForSkill(skillName);
     const fixtureNames = (await listDir(skillDir)).filter(
       (n) => !opts.fixture || n === opts.fixture
     );
@@ -303,7 +322,7 @@ async function main() {
       try {
         review = await reviewWithSkill({ fixture, skillName, budgetUsd: reviewBudget, verbose, strictAuth });
         console.log(`  review: ${review.length} chars`);
-        findings = await extractFindings({ reviewText: review, budgetUsd: extractBudget, verbose, strictAuth, model: extractModel });
+        findings = await extractFindings({ reviewText: review, categories, budgetUsd: extractBudget, verbose, strictAuth, model: extractModel });
       } catch (err) {
         console.error(`  ERROR: ${err.message}`);
         results.push({ skill: skillName, fixture: fixtureName, error: err.message });

@@ -1,0 +1,12 @@
+{
+  "categories": [
+    "missing-dep",
+    "stale-closure",
+    "functional-updater",
+    "over-memoization",
+    "key-antipattern",
+    "async-cleanup",
+    "rules-of-hooks",
+    "server-component-leak"
+  ]
+}
