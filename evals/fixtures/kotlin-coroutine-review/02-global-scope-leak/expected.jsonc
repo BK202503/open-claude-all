@@ -1,0 +1,22 @@
+{
+  // Two flavours of the same leak inside a Spring @Component:
+  //   line 13 — GlobalScope.launch: no parent, never cancelled.
+  //   line 20 — CoroutineScope(Dispatchers.IO).launch inline: same problem,
+  //             the scope has no parent and no @PreDestroy cancels it.
+  // Either category label is acceptable ("global-scope-leak" is the direct
+  // catalog hit; "scope-lifecycle-leak" is the broader framing).
+  "must_flag": [
+    {
+      "line": 13,
+      "category": ["global-scope-leak", "scope-lifecycle-leak"],
+      "hint": "GlobalScope.launch inside @Component — inject a CoroutineScope with a Job cancelled on @PreDestroy"
+    },
+    {
+      "line": 20,
+      "category": ["global-scope-leak", "scope-lifecycle-leak"],
+      "hint": "Inline CoroutineScope(Dispatchers.IO).launch — same leak, no lifecycle owner"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Structured-concurrency violations via unowned scopes inside a Spring bean."
+}

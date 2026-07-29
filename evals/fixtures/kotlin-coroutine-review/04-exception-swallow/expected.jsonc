@@ -1,0 +1,19 @@
+{
+  // The catch (CancellationException) on line 16 swallows cancellation:
+  // it logs and returns normally instead of rethrowing. This breaks structured
+  // concurrency — the parent thinks syncOnce finished cleanly and the cancel
+  // request is lost. Correct: either drop the CancellationException catch
+  // entirely, or rethrow after logging.
+  "must_flag": [
+    {
+      "line": 16,
+      "category": ["exception-swallow"],
+      "hint": "catch (CancellationException) without rethrow — breaks cancellation propagation"
+    }
+  ],
+  "must_not_flag": [
+    // The generic catch (Exception) on line 18 is fine on its own; only the
+    // CancellationException swallow is the defect here.
+  ],
+  "notes": "Isolates the cancellation-swallow bug: everything else (delay, remote suspend calls) is correct."
+}

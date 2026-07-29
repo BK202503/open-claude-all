@@ -1,0 +1,14 @@
+{
+  "categories": [
+    "blocking-in-suspend",
+    "global-scope-leak",
+    "dispatcher-misuse",
+    "exception-swallow",
+    "structured-concurrency-violation",
+    "missing-exception-handler",
+    "flow-blocking-emit",
+    "supervisor-misuse",
+    "runblocking-in-suspend",
+    "scope-lifecycle-leak"
+  ]
+}

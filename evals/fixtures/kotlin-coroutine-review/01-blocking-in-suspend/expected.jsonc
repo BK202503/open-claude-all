@@ -1,0 +1,21 @@
+{
+  // Two overlapping defects on this suspend fun:
+  //   line 10 — Thread.sleep in a suspend fun (should be delay)
+  //   line 12 — JDBC executeQuery in a suspend fun on default dispatcher
+  //             (should be wrapped in withContext(Dispatchers.IO))
+  // Both share category "blocking-in-suspend".
+  "must_flag": [
+    {
+      "line": 10,
+      "category": ["blocking-in-suspend"],
+      "hint": "Thread.sleep in suspend fun — use delay(500)"
+    },
+    {
+      "line": 12,
+      "category": ["blocking-in-suspend"],
+      "hint": "JDBC executeQuery in suspend fun without withContext(Dispatchers.IO)"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Minimal blocking-in-suspend: Thread.sleep + blocking JDBC in a suspend fun on the default dispatcher."
+}
