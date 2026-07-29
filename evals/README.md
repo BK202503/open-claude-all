@@ -34,10 +34,20 @@ Cost per fixture is capped by `--review-budget-usd` (default 0.20) and `--extrac
 ## Fixture format
 
 ```
-evals/fixtures/<skill-name>/<NN-slug>/
-├── input.<ext>       # the file the skill will review (tsx / ts / kt / etc.)
-└── expected.jsonc    # what the skill must (and must not) flag
+evals/fixtures/<skill-name>/
+├── categories.json               # canonical category set for this skill
+└── <NN-slug>/
+    ├── input.<ext>               # the file the skill will review (tsx / ts / kt / etc.)
+    └── expected.jsonc            # what the skill must (and must not) flag
 ```
+
+`categories.json`:
+
+```json
+{ "categories": ["missing-dep", "stale-closure", "..."] }
+```
+
+The extractor's JSON schema constrains `category` to this list. Categories differ per skill (React hooks ≠ Kotlin coroutines ≠ Spring Kafka), so each fixture directory owns its own list.
 
 `expected.jsonc`:
 
@@ -61,9 +71,7 @@ Scoring:
 - **FP** — model finding matches no `must_flag` entry
 - **FN** — `must_flag` entry with no matching model finding
 
-Categories (canonical set enforced by JSON schema on the extractor):
-
-- `missing-dep`, `stale-closure`, `functional-updater`, `over-memoization`, `key-antipattern`, `async-cleanup`, `rules-of-hooks`, `server-component-leak`
+Categories are per-skill. See `evals/fixtures/<skill>/categories.json` for the canonical set the extractor enforces.
 
 ## Two-pass design
 
@@ -82,7 +90,10 @@ Keeping the skill's output natural means we score the skill as users experience 
 
 ## Adding a new skill
 
-Create `evals/fixtures/<skill-name>/` with fixtures. The runner discovers skills automatically. Extend `CANONICAL_CATEGORIES` in `runner.mjs` if the skill needs new labels.
+1. `evals/fixtures/<skill-name>/categories.json` — the canonical category set for the skill.
+2. `evals/fixtures/<skill-name>/<NN-slug>/` — one directory per planted-bug fixture.
+
+The runner auto-discovers skills. No `runner.mjs` edit is needed unless you're changing scoring behaviour.
 
 ## Results
 
