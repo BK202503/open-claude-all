@@ -1,0 +1,16 @@
+{
+  // PaymentsModule declares PaymentsService in `providers` but has no `exports`
+  // key. CheckoutModule imports PaymentsModule and CheckoutController injects
+  // PaymentsService — Nest will throw at boot ("Nest can't resolve dependencies
+  // of the CheckoutController (?)"). Fix is to add `exports: [PaymentsService]`
+  // to PaymentsModule.
+  "must_flag": [
+    {
+      "line": 10,
+      "category": ["missing-export"],
+      "hint": "PaymentsService in providers but not exports; CheckoutController on line 17 tries to inject it"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Two @Module classes in one file mirror a small Nest app. Reviewer must connect the missing export in PaymentsModule (line 10-14) with the injection site in CheckoutController (line 18)."
+}
