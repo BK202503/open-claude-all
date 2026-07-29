@@ -1,0 +1,16 @@
+{
+  // FixedBackOff(interval, Long.MAX_VALUE) means the DefaultErrorHandler will
+  // retry a failing record ~forever, blocking the partition. A poison record
+  // stalls the consumer. Fix: pass a finite maxAttempts (e.g. FixedBackOff(1000L, 3))
+  // or use ExponentialBackOff with maxRetries set, and wire a
+  // DeadLetterPublishingRecoverer as the recoverer arg.
+  "must_flag": [
+    {
+      "line": 17,
+      "category": ["unbounded-retry", "poison-message-blocking"],
+      "hint": "FixedBackOff maxAttempts=Long.MAX_VALUE → infinite retry on poison record"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Classic unbounded retry via DefaultErrorHandler + FixedBackOff(_, Long.MAX_VALUE)."
+}
