@@ -1,0 +1,23 @@
+{
+  // GenericFilter is @Catch() (no args → catches everything, including
+  // HttpException). SpecificFilter is @Catch(HttpException). GenericFilter is
+  // registered globally via APP_FILTER (line 40) while SpecificFilter is bound
+  // at controller level (line 29). Controller-scope filters run before global
+  // ones for the SAME exception type, so for HttpException SpecificFilter wins
+  // — good. But GenericFilter catching `unknown` at global scope means every
+  // non-HttpException still goes through it and returns 500 with the stringified
+  // exception, which leaks internals. The intended catch order (specific http
+  // errors → typed handler; unknowns → sanitised 500) is unclear from this wiring
+  // and easy to break: if someone drops @UseFilters, HttpExceptions start
+  // returning generic 500s. Prefer a single global chain with narrower @Catch()
+  // classes, or document the two-layer intent explicitly.
+  "must_flag": [
+    {
+      "line": 29,
+      "category": ["filter-order"],
+      "hint": "controller-level @UseFilters(SpecificFilter) combined with globally-registered GenericFilter (APP_FILTER on line 40) — catch order unclear; GenericFilter also matches HttpException and will leak internals for non-HTTP throws"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Filter chain wiring smell: global @Catch() next to controller-scoped @Catch(HttpException). Anchor is the @UseFilters(...) decorator at line 29 — that is where the reviewer sees the two-layer setup collide. A review that only flags the APP_FILTER line (40) will be an EXTRA finding rather than a TP, which is intentional: the controller-level annotation is the more visible design decision to critique."
+}

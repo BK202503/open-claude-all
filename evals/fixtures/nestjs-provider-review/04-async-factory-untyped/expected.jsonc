@@ -1,0 +1,19 @@
+{
+  // Two coupled defects on the async factory:
+  //   1. useFactory: async (...) => ... has no explicit return type annotation,
+  //      so the token type is inferred from an implicit Promise<{url, query}>.
+  //      A future refactor of the body silently changes what consumers see.
+  //   2. The factory expects (ConfigService, LoggerService) but `inject:` only
+  //      lists [ConfigService]. `logger` will be undefined at boot, and
+  //      logger.log("connecting") throws only when the first consumer resolves
+  //      DB_CONNECTION — not at module init.
+  "must_flag": [
+    {
+      "line": 18,
+      "category": ["async-factory-untyped"],
+      "hint": "async useFactory with no explicit return type AND inject: array missing LoggerService — factory param `logger` will be undefined at boot"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Both problems live on the same provider block (line 16-24); flagging the factory line (18) or the inject line (23) both fall within ±3. Category is async-factory-untyped for both since they are the same regression class."
+}

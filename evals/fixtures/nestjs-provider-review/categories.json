@@ -1,0 +1,14 @@
+{
+  "categories": [
+    "scope-upgrade",
+    "forwardref-cycle",
+    "missing-export",
+    "async-factory-untyped",
+    "filter-order",
+    "global-module-overuse",
+    "transient-leak",
+    "pipe-guard-order",
+    "middleware-vs-guard",
+    "adapter-mismatch"
+  ]
+}
