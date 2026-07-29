@@ -1,0 +1,14 @@
+{
+  // GET returns a plain object on line 17 instead of Response/NextResponse.
+  // Next.js will 500 with no obvious error. Correct: `return Response.json(body)`
+  // or `return NextResponse.json(body)`.
+  "must_flag": [
+    {
+      "line": 17,
+      "category": ["route-handler-plain-return"],
+      "hint": "GET returns plain object; must return Response or NextResponse"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "dynamic = force-dynamic is already set on line 3, so the skill should focus on the return-value defect, not caching."
+}

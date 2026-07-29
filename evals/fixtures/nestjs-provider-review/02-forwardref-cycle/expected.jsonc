@@ -1,0 +1,22 @@
+{
+  // UsersService and OrdersService depend on each other, and UsersModule and
+  // OrdersModule likewise. Every forwardRef here papers over a design smell:
+  // the two modules should either be merged, or one dependency should be
+  // inverted (e.g. an event/queue, or moving the shared read into a third
+  // service). "Works today, fails at boot after the next refactor" is the
+  // classic outcome.
+  "must_flag": [
+    {
+      "line": 6,
+      "category": ["forwardref-cycle"],
+      "hint": "forwardRef in a mutual constructor injection — cyclic dep between UsersService and OrdersService"
+    },
+    {
+      "line": 29,
+      "category": ["forwardref-cycle"],
+      "hint": "forwardRef between UsersModule and OrdersModule imports — modules should be merged or the dep inverted"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Two-level cycle (service + module). Either flagging the service-level forwardRef or the module-level forwardRef counts within ±3 lines."
+}

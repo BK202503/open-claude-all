@@ -1,0 +1,14 @@
+{
+  "categories": [
+    "unbounded-retry",
+    "missing-dlt",
+    "missing-error-handler",
+    "ack-mode-mismatch",
+    "suspend-scope-leak",
+    "retry-topic-misconfig",
+    "poison-message-blocking",
+    "idempotency-gap",
+    "ack-race",
+    "blocking-retry-classes"
+  ]
+}

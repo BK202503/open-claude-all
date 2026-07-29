@@ -1,0 +1,17 @@
+{
+  // AckMode.MANUAL requires the listener to call acknowledgment.acknowledge()
+  // on EVERY code path. The blank-value branch returns without calling ack, so
+  // the offset never commits. On the next poll (or rebalance) Kafka re-delivers
+  // the same record → infinite re-delivery loop of the poison message. Fix:
+  // either ack before the early return (treat blank as processed) or send to
+  // a DLT explicitly.
+  "must_flag": [
+    {
+      "line": 21,
+      "category": ["ack-mode-mismatch"],
+      "hint": "AckMode.MANUAL but early-return path skips ack.acknowledge() → infinite redelivery"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Missing ack on the early-return branch under AckMode.MANUAL."
+}

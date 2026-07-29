@@ -1,0 +1,13 @@
+{
+  // Stable id (todo.id) exists but ignored — classic mis-key with associated
+  // internal state (the checkbox). Reorder or delete corrupts checked state.
+  "must_flag": [
+    {
+      "line": 18,
+      "category": ["key-antipattern"],
+      "hint": "key={i} on reorderable list with internal state; use todo.id"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Uses index as key while carrying checkbox state indexed by position — the textbook antipattern."
+}

@@ -1,0 +1,22 @@
+{
+  // "use client" file directly imports the server-only db client on line 4 and
+  // reads process.env.SECRET_KEY on lines 15/16. Both ship to the browser
+  // bundle: the db import pulls its transitive graph into the client chunk,
+  // and SECRET_KEY (no NEXT_PUBLIC_ prefix) is undefined at runtime AND may
+  // still be substituted at build time depending on config — either way, a
+  // secret name landing in a client file is a review-stopping smell.
+  "must_flag": [
+    {
+      "line": 4,
+      "category": ["use-client-secret-leak", "server-only-import-in-client"],
+      "hint": "\"use client\" file imports @/lib/db — server-only module in client bundle"
+    },
+    {
+      "line": 16,
+      "category": ["use-client-secret-leak", "env-in-client-bundle"],
+      "hint": "process.env.SECRET_KEY read inside a \"use client\" file"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Both the db import and the SECRET_KEY read are defects. SECRET_KEY appears on lines 16 and 17; either counts (±3 tolerance)."
+}

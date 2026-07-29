@@ -1,0 +1,19 @@
+{
+  // Two independent regressions in a tiny file:
+  //   (a) missing userId dep — effect never re-runs when the prop changes
+  //   (b) no cleanup / AbortController — a race can setState after unmount
+  "must_flag": [
+    {
+      "line": 10,
+      "category": ["missing-dep"],
+      "hint": "useEffect missing dep: userId"
+    },
+    {
+      "line": 11,
+      "category": ["async-cleanup"],
+      "hint": "fetch with no AbortController; can setState after unmount"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Both findings are true positives. A skill that catches only one gets recall 50%."
+}

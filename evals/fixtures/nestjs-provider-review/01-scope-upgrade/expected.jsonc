@@ -1,0 +1,18 @@
+{
+  // TenantContext is REQUEST-scoped (line 3), then injected into OrdersController
+  // (line 16) which has no explicit scope — so it defaults to SINGLETON. Nest
+  // silently upgrades the controller (and its transitive graph) to request
+  // scope, which means a new controller instance per HTTP request and a real
+  // throughput hit. The fix is to either accept the upgrade explicitly, use
+  // ContextIdFactory + REQUEST injection, or restructure so the tenant value
+  // rides in the request object instead of a scoped provider.
+  "must_flag": [
+    {
+      "line": 3,
+      "category": ["scope-upgrade"],
+      "hint": "Scope.REQUEST provider injected into a DEFAULT-scoped controller — whole graph upgrades to request scope"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Textbook silent scope upgrade. Either flagging line 3 (the scope declaration) or line 16 (the injection site) counts if line window ±3 catches it."
+}

@@ -1,0 +1,17 @@
+{
+  // latestPrices returns the map immediately (line 18) before any of the
+  // launched children have populated it. The caller depends on the result,
+  // so this must be wrapped in coroutineScope { symbols.map { async { ... } }
+  //   .awaitAll() } — or the launches converted to async.
+  // Either category label is defensible: "structured-concurrency-violation"
+  // is the direct catalog hit; some reviewers frame it as a scope leak.
+  "must_flag": [
+    {
+      "line": 14,
+      "category": ["structured-concurrency-violation", "global-scope-leak"],
+      "hint": "launch inside suspend fun without coroutineScope { } — result is returned before children finish"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Result-race: the suspend fun returns while children still write to `result`, and the injected scope may outlive the caller."
+}

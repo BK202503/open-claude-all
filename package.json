@@ -20,6 +20,10 @@
   "engines": {
     "node": ">=18"
   },
+  "scripts": {
+    "eval": "node evals/runner.mjs",
+    "eval:dry": "node evals/runner.mjs --dry-run"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BK202503/open-claude-all.git"

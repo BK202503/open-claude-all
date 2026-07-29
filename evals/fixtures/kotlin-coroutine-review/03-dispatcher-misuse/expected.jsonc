@@ -1,0 +1,14 @@
+{
+  // Body is a tight SHA-256 loop over 200k rounds — pure CPU work. Running it
+  // on Dispatchers.IO occupies an I/O worker (64+ default cap) for CPU-bound
+  // work, starving actual I/O throughput. Should be Dispatchers.Default.
+  "must_flag": [
+    {
+      "line": 11,
+      "category": ["dispatcher-misuse"],
+      "hint": "CPU-bound hashing on Dispatchers.IO — should be Dispatchers.Default"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Isolates dispatcher-misuse: no blocking-in-suspend or leak — just the wrong pool for the workload."
+}
