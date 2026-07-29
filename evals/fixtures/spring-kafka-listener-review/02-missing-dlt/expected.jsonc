@@ -1,0 +1,17 @@
+{
+  // Bounded backoff is present, so the retry loop terminates — but the
+  // DefaultErrorHandler was constructed without a ConsumerRecordRecoverer
+  // (specifically DeadLetterPublishingRecoverer). Once attempts exhaust, the
+  // failed record is logged at ERROR and dropped. For a payments topic, that
+  // is silent data loss. Fix: pass DeadLetterPublishingRecoverer(kafkaTemplate)
+  // as the first arg so exhausted records land on payments.DLT.
+  "must_flag": [
+    {
+      "line": 17,
+      "category": ["missing-dlt"],
+      "hint": "DefaultErrorHandler has no DeadLetterPublishingRecoverer — exhausted records dropped silently"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Isolates missing-DLT from unbounded-retry — backoff is bounded here."
+}

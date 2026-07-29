@@ -1,0 +1,20 @@
+{
+  // suspend @KafkaListener requires spring-kafka 3.3+ (satisfied in header),
+  // but the listener launches work on an *external* CoroutineScope (`bg`)
+  // instead of awaiting it via coroutineScope { ... }. The suspend function
+  // returns as soon as `launch` is scheduled → the MessageListenerContainer
+  // commits the offset while sender.send() is still running. If the send
+  // fails or the pod dies mid-flight, the record is silently lost.
+  // Fix: wrap in `coroutineScope { launch { sender.send(...) } }` (or drop
+  // launch entirely and just await), so the parent suspends until children
+  // complete before ack.
+  "must_flag": [
+    {
+      "line": 22,
+      "category": ["suspend-scope-leak", "ack-race"],
+      "hint": "launch on external scope inside suspend @KafkaListener — container acks before child completes"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Suspend scope leak → ack-race. Version-gated (spring-kafka 3.3+ for suspend support)."
+}

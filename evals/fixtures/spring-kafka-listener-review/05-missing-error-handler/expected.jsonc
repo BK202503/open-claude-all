@@ -1,0 +1,18 @@
+{
+  // No CommonErrorHandler bean is configured, so the container uses its
+  // fallback (LoggingErrorHandler behavior on the default DefaultErrorHandler
+  // with no recoverer + default backoff). Exceptions get logged and the record
+  // moves on — silent loss on the audit topic. Fix: register a
+  // DefaultErrorHandler bean with FixedBackOff(_, N) and a
+  // DeadLetterPublishingRecoverer, or wire a CommonErrorHandler on the
+  // container factory.
+  "must_flag": [
+    {
+      "line": 17,
+      "category": ["missing-error-handler"],
+      "hint": "No CommonErrorHandler / DefaultErrorHandler bean → container swallows poison messages"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "No error handler at all — distinct from 01 (unbounded) and 02 (bounded but no DLT)."
+}
