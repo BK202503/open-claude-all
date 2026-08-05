@@ -98,6 +98,9 @@ Competing frameworks (oh-my-claudecode, claude-forge, etc.) focus mostly on "wri
 - `parallel-dispatch`: parallel read (status / lookup) fan-out.
 - `parallel-dev`: worktree-isolated parallel development (write).
 - `branch-guard`: block direct writes to `main` / `master` / `trunk` (backed by a PreToolUse hook).
+- `review`: language-aware PR review dispatcher. Scans the diff for file types and fans out to the right specialist skills automatically (`jvm-memory-leak-review`, `kotlin-coroutine-review`, `spring-kafka-listener-review`, `react-hooks-review`, `nestjs-provider-review`). AUTO-INVOKEs `review-loop` when must-fix findings are found.
+- `ai-tell-cleanup`: detects and fixes AI writing tells in code comments, commit messages, and PR bodies — em dashes, code-restating comments, filler phrases ("Note that", "This ensures that"), section-separator noise, verbose docstrings. AUTO-INVOKEs after Write/Edit tool calls and before commits. Opt out with `"ai-tell-cleanup 끄기"`.
+- `review-loop`: iterative review → auto-fix → re-check loop. Auto-fixes only deterministic findings (em dashes, AI footers, section separators, code-restating comments), re-runs review, repeats until clean or 5 iterations max. Passes anything requiring judgment to the user unchanged.
 
 ### `parallel-dispatch` vs `parallel-dev` — when to use which
 
@@ -114,6 +117,7 @@ Rule of thumb: if any unit writes to disk, use `parallel-dev`. If every unit is 
 
 - `spring-kafka-listener-review`: catches known regression patterns around `DefaultErrorHandler`, `@RetryableTopic`, ack mode, DLT wiring, suspend `@KafkaListener` version gaps, and more.
 - `kotlin-coroutine-review`: structured-concurrency violations, blocking-in-suspend, dispatcher misuse, `GlobalScope` leaks, missing `CoroutineExceptionHandler`, and more.
+- `jvm-memory-leak-review`: 9-phase structured review for JVM memory leak patterns in Java/Kotlin Spring Boot — static collection accumulation, ThreadLocal cleanup, listener lifecycle, unbounded caches, unclosed resources, bean scope mismatch, `@Async` shared state, Kotlin Channel/Flow pitfalls. AUTO-INVOKEs during any PR review that touches `.java` or `.kt` files.
 
 ### React / Next.js track
 
