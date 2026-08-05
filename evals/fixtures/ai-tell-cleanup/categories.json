@@ -1,0 +1,13 @@
+{
+  "categories": [
+    "em-dash",
+    "curly-quote",
+    "ellipsis-char",
+    "code-restating-comment",
+    "filler-phrase",
+    "section-separator",
+    "verbose-docstring",
+    "ai-commit-pattern",
+    "ai-pr-pattern"
+  ]
+}

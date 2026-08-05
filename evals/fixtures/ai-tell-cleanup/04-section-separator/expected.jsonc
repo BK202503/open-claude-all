@@ -1,0 +1,23 @@
+{
+  // Three decorative section-separator blocks: === box, --- line, ### box.
+  // All three should be removed; class/method structure already communicates the grouping.
+  "must_flag": [
+    {
+      "line": 5,
+      "category": ["section-separator"],
+      "hint": "=== separator block around 'Initialization' — remove all three lines"
+    },
+    {
+      "line": 14,
+      "category": ["section-separator"],
+      "hint": "--- separator line 'Data Loading' — remove"
+    },
+    {
+      "line": 20,
+      "category": ["section-separator"],
+      "hint": "### separator block around 'Report Building' — remove all three lines"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Each separator block counts as one finding regardless of how many comment lines it spans."
+}
