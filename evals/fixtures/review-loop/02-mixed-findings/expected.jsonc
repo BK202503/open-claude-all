@@ -1,0 +1,31 @@
+{
+  // Input has both auto-fixable and needs-human findings:
+  //   line 8:  em-dash              → auto-fix
+  //   line 10: filler-phrase        → needs-human (sentence restructure required)
+  //   line 14: code-restating-comment → auto-fix
+  //
+  // Loop auto-fixes lines 8 and 14, passes line 10 to human.
+  // Final state is needs-human (not clean) because filler-phrase remains.
+  "max_iterations": 1,
+  "must_auto_fix": [
+    {
+      "line": 8,
+      "category": "em-dash",
+      "hint": "em dash replaced"
+    },
+    {
+      "line": 14,
+      "category": "code-restating-comment",
+      "hint": "comment restates mailer.send() — removed"
+    }
+  ],
+  "must_not_auto_fix": [
+    {
+      "line": 10,
+      "category": "filler-phrase",
+      "hint": "Note that — requires sentence judgment, must stay in needs-human"
+    }
+  ],
+  "final_state": "needs-human",
+  "notes": "Mixed input. Auto-fixable items resolved in 1 iteration. Filler-phrase must appear in the needs-human section of the final report, not silently dropped."
+}
