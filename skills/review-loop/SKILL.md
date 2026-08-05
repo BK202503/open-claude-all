@@ -1,6 +1,6 @@
 ---
 name: review-loop
-description: Iterative review-fix-recheck loop — runs the review skill, auto-fixes only deterministic findings (em dashes, AI footers, curly quotes, code-restating comments), re-runs review, repeats until clean or max 5 iterations. Stops and reports anything that needs human judgment. Triggers include "리뷰 루프 돌려", "review loop", "고치고 다시 확인", "자동 수정하고 재검토", "clean this up".
+description: Iterative review-fix-recheck loop — runs the review skill, auto-fixes only deterministic findings (em dashes, AI footers, curly quotes, code-restating comments), re-runs review, repeats until clean or max 5 iterations. Stops and reports anything that needs human judgment. AUTO-INVOKE when the review skill reports must-fix findings. Triggers include "리뷰 루프 돌려", "review loop", "고치고 다시 확인", "자동 수정하고 재검토", "clean this up".
 version: 0.1.0
 ---
 

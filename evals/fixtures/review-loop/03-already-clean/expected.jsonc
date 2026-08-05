@@ -1,0 +1,9 @@
+{
+  // Input is already clean — no comments, no em dashes, no AI tells.
+  // The loop should detect zero findings and exit without any iteration.
+  "max_iterations": 0,
+  "must_auto_fix": [],
+  "must_not_auto_fix": [],
+  "final_state": "clean",
+  "notes": "Zero-finding input. The skill must exit immediately and report clean without attempting any modifications. Verifies the loop does not false-positive on clean code."
+}
