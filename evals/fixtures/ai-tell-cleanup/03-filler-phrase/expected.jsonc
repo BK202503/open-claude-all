@@ -1,0 +1,34 @@
+{
+  // Five filler-phrase hits across four comment blocks.
+  // "Note that", "This ensures that", "It is worth noting that",
+  // "in order to", "Please note that" — all pad length with zero information.
+  "must_flag": [
+    {
+      "line": 6,
+      "category": ["filler-phrase"],
+      "hint": "'Note that' adds nothing — delete the comment or keep only 'amount must be positive'"
+    },
+    {
+      "line": 11,
+      "category": ["filler-phrase"],
+      "hint": "'This ensures that' — delete; the if-block makes it obvious"
+    },
+    {
+      "line": 15,
+      "category": ["filler-phrase"],
+      "hint": "'It is worth noting that' — delete prefix"
+    },
+    {
+      "line": 16,
+      "category": ["filler-phrase"],
+      "hint": "'in order to' — shorten to 'to'"
+    },
+    {
+      "line": 20,
+      "category": ["filler-phrase"],
+      "hint": "'Please note that' — delete the comment entirely"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "All five are filler-phrase hits. Lines 15-16 are one comment block but contain two distinct patterns."
+}

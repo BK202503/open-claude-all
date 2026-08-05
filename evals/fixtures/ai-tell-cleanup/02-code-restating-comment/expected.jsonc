@@ -1,0 +1,28 @@
+{
+  // Four comments that say exactly what the next line of code already says.
+  // None of them explain WHY — all are safe to delete.
+  "must_flag": [
+    {
+      "line": 9,
+      "category": ["code-restating-comment"],
+      "hint": "comment restates repo.findById — remove"
+    },
+    {
+      "line": 11,
+      "category": ["code-restating-comment"],
+      "hint": "comment restates return statement — remove"
+    },
+    {
+      "line": 16,
+      "category": ["code-restating-comment"],
+      "hint": "comment restates repo.save — remove"
+    },
+    {
+      "line": 21,
+      "category": ["code-restating-comment"],
+      "hint": "comment restates repo.deleteById — remove"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "All four are pure restatements with no WHY. A skill that misses any one gets recall below 100%."
+}
