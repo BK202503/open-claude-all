@@ -3,148 +3,100 @@
 [![npm](https://img.shields.io/npm/v/open-claude-all.svg)](https://www.npmjs.com/package/open-claude-all)
 [![license](https://img.shields.io/npm/l/open-claude-all.svg)](LICENSE)
 
-Claude Code skills and hooks focused on **shipping clean PRs and pre-verifying the impact on existing code**.
+Harness engineering for Claude Code. Skills and hooks that catch issues before PRs land, block unsafe writes, and map the blast radius of every change.
 
-npm: https://www.npmjs.com/package/open-claude-all
 
 ## Install
 
-Four install paths, ordered from most managed to most manual. Pick one.
-
-| # | Path | Requires | Best for |
-| :-: | --- | --- | --- |
-| 1 | Claude Code plugin marketplace | Claude Code v2.1+ | most users — managed updates |
-| 2 | `npx` | Node 18+ | quick one-shot install |
-| 3 | `curl \| bash` | POSIX shell | no-Node environments |
-| 4 | Git clone | git | you want to read the source first |
-
-After any path, restart Claude Code, then run `/status` to confirm skills are picked up.
-
-### 1. Claude Code plugin marketplace *(recommended)*
-
 ```sh
-/plugin marketplace add BK202503/open-claude-all
-/plugin install open-claude-all@open-claude-all
+npx open-claude-all
 ```
 
-Auto-discovers skills, wires the `branch-guard` hook, and gets updates via `/plugin update`. Skills namespace as `/open-claude-all:<skill-name>`.
+Restart Claude Code after install, then run `/status` to confirm skills are active.
 
-### 2. `npx`
+Other install paths:
 
-```sh
-npx open-claude-all               # install
-npx open-claude-all --dry-run     # preview only, change nothing
-npx open-claude-all --skip-hook   # skills only, skip branch-guard wiring
-npx open-claude-all uninstall     # reverse the install
-```
+| Path | Command |
+| --- | --- |
+| Plugin marketplace | `/plugin marketplace add BK202503/open-claude-all` |
+| curl | `curl -fsSL https://bk202503.github.io/open-claude-all/get \| bash` |
+| Git clone | `git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all && ~/.open-claude-all/install.sh` |
 
-Pin the version: `npx open-claude-all@0.1.3`.
+To pin a version: `npx open-claude-all@0.1.3`
 
-### 3. `curl | bash`
-
-```sh
-curl -fsSL https://bk202503.github.io/open-claude-all/get | bash
-```
-
-Downloads the latest `main` and runs `install.sh` on any POSIX shell (macOS, Linux, WSL). Forward flags after `bash -s --`:
-
-```sh
-curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --dry-run
-curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --skip-hook
-```
-
-Against a moving `main`, this is a supply-chain risk. See [Pinning to a release](#pinning-to-a-release) below.
-
-### 4. Git clone
-
-```sh
-git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all
-~/.open-claude-all/install.sh
-```
-
-### Pinning to a release
-
-`curl | bash` and `git clone` both track `main` by default. To pin:
-
-```sh
-# direct from GitHub at a tag (works once the tag is pushed):
-curl -fsSL https://raw.githubusercontent.com/BK202503/open-claude-all/v0.1.3/install.sh | bash
-
-# via get.sh (planned; OCA_REF support is not yet wired in the get endpoint):
-OCA_REF=v0.1.3 curl -fsSL https://bk202503.github.io/open-claude-all/get | bash
-```
-
-For npm: `npx open-claude-all@0.1.3`. For the marketplace path, `/plugin update` pulls the latest published version.
-
-## Why use this
-
-Claude Code writes code fine on its own. What it tends to miss is what happens **right before that code goes out as a PR**:
-
-1. **Is the PR clean?** Scope drifted, commit messages restate the diff, unrelated refactors slipped in.
-2. **What does it touch in existing code?** Every caller of a signature that changed, every reference to a renamed config key, N+1 regressions, known regression patterns.
-
-This repository automates those two axes:
-
-- **(A) Clean PRs.** Scope discipline, commit style that lowers the review bar, blocking direct writes to protected branches.
-- **(B) Impact verification on existing code.** `pr-impact-scan` enumerates caller / test / config blind spots. Domain-specific review skills (Spring Kafka listener, Kotlin coroutine) catch known regression patterns before they land.
-
-Competing frameworks (oh-my-claudecode, claude-forge, etc.) focus mostly on "writing code" automation (agent orchestration, prompt injection, etc.). This project specializes in the back end: **getting the code you already wrote safely out as a PR**.
 
 ## What's inside
 
-### Impact and PR quality (general)
+### PR review pipeline
 
-- `pr-impact-scan`: enumerate every caller of changed functions / classes / config keys, judge signature compatibility, compute test coverage delta, draft PR body.
-- `parallel-dispatch`: parallel read (status / lookup) fan-out.
-- `parallel-dev`: worktree-isolated parallel development (write).
-- `branch-guard`: block direct writes to `main` / `master` / `trunk` (backed by a PreToolUse hook).
+Run `/review` and the skills below chain together automatically.
 
-### `parallel-dispatch` vs `parallel-dev` — when to use which
+| Skill | What it does |
+| --- | --- |
+| `review` | Detects file types in the diff and routes to the right specialist skills. AUTO-INVOKEs `review-loop` when must-fix findings are found. |
+| `review-loop` | Runs review, auto-fixes deterministic issues (em dashes, AI footers, code-restating comments), re-runs review, repeats until clean or 5 iterations max. Passes judgment calls to you. |
+| `ai-tell-cleanup` | Removes AI writing tells from comments, commit messages, and PR bodies. Runs automatically after edits. Disable with `"ai-tell-cleanup off"`. |
+| `pr-impact-scan` | Before opening a PR, traces every caller of changed functions, checks signature compatibility, identifies missing tests, and drafts the PR body. |
 
-Same "fan out N subagents in one response" shape, different safety envelope.
+### Java / Kotlin
 
-- **Read fan-out → `parallel-dispatch`.** No worktree, no writes, no isolation. Example:
-  - *"Check the status of PR #22536, #4523, and #18103 in parallel"* → three read-only subagents fan out, each calls `gh pr view`, results are aggregated in one reply.
-- **Write fan-out → `parallel-dev`.** Each unit gets its own git worktree, file scopes must be non-overlapping, and the parent merges branches back sequentially after reviewing each diff. Example:
-  - *"Build the login page, the settings page, and the API client at once"* → three worktree-isolated `general-purpose` agents, disjoint directories, sequential `--no-ff` merge back to base.
+| Skill | What it catches |
+| --- | --- |
+| `jvm-memory-leak-review` | Static collection accumulation, ThreadLocal not removed, listener not unregistered, unbounded caches, unclosed resources, bean scope mismatch, `@Async` shared state, Kotlin Channel/Flow leaks. AUTO-INVOKEs on `.java` / `.kt` diffs. |
+| `kotlin-coroutine-review` | Blocking calls in suspend functions, `GlobalScope` leaks, dispatcher misuse, missing `CoroutineExceptionHandler`, Flow back-pressure issues. |
+| `spring-kafka-listener-review` | `DefaultErrorHandler` misconfiguration, `@RetryableTopic` pitfalls, ack mode correctness, DLT wiring gaps, suspend `@KafkaListener` version compatibility. |
 
-Rule of thumb: if any unit writes to disk, use `parallel-dev`. If every unit is read-only, use `parallel-dispatch`.
+### React / Next.js
 
-### Kotlin / JVM Spring track
+| Skill | What it catches |
+| --- | --- |
+| `react-hooks-review` | `useEffect` dep-array bugs, stale closures, functional-updater misses, list-key anti-patterns, async-effect cleanup leaks. |
+| `nextjs-app-router-review` | Server/client component boundary mistakes, `fetch` cache misuse, async params in Next 15+, server secrets leaking into client bundles. |
+| `frontend-perf-impact-scan` | Bundle bloat, LCP/CLS risks, network waterfalls, hydration mismatch. Ranked Blocker / Watch / Nit. |
 
-- `spring-kafka-listener-review`: catches known regression patterns around `DefaultErrorHandler`, `@RetryableTopic`, ack mode, DLT wiring, suspend `@KafkaListener` version gaps, and more.
-- `kotlin-coroutine-review`: structured-concurrency violations, blocking-in-suspend, dispatcher misuse, `GlobalScope` leaks, missing `CoroutineExceptionHandler`, and more.
+### NestJS
 
-### React / Next.js track
+| Skill | What it catches |
+| --- | --- |
+| `nestjs-provider-review` | Injection-scope misuse, circular deps hidden by `forwardRef`, missing module exports, filter/interceptor/pipe/guard ordering pitfalls. |
 
-- `react-hooks-review`: `useEffect` dep-array bugs, stale closures, functional-updater misses, over-memoization, list-key anti-patterns, async-effect cleanup leaks, silent Rules-of-Hooks violations.
-- `nextjs-app-router-review`: server / client component boundary mistakes, `fetch` cache and revalidate misuse, async `params` / `searchParams` in Next 15+, server-only secrets leaking into client bundles, hydration mismatches, route handler pitfalls.
-- `frontend-perf-impact-scan`: the frontend counterpart to `pr-impact-scan`. Enumerates concrete perf regressions in a diff (bundle bloat, LCP / CLS risks, network waterfalls, hydration mismatch surface) and ranks them Blocker / Watch / Nit before you PR.
+### Parallel work
 
-### NestJS track
+| Skill | When to use |
+| --- | --- |
+| `parallel-dev` | Fan out N independent coding tasks, each in its own git worktree. Parent merges sequentially after reviewing each diff. Use when any unit writes to disk. |
+| `parallel-dispatch` | Fan out N read-only lookups (PR status, log queries, etc.) in one response. No worktrees, fast. |
 
-- `nestjs-provider-review`: injection-scope misuse, circular deps hidden by `forwardRef`, missing module `exports`, exception-filter / interceptor / pipe / guard ordering pitfalls, async-provider typing gaps.
+### Safety
+
+| Hook | What it does |
+| --- | --- |
+| `branch-guard` | Blocks file edits on `main` / `master` / `trunk` via a PreToolUse hook. |
 
 ### Agents
 
-Agents wrap the skills above for one-shot invocation against a concrete PR.
+| Agent | What it does |
+| --- | --- |
+| `pr-reviewer` | Checks scope discipline, impact enumeration, and commit hygiene in one shot. Ranks findings Blocker / Watch / Nit. |
+| `pr-impact-runner` | Takes a PR URL, runs `pr-impact-scan`, returns a compact ranked report. |
 
-- `pr-reviewer`: opinionated PR reviewer aligned with this repo's clean-PR philosophy. Checks scope discipline, impact enumeration, commit hygiene, and AI-attribution rules. Ranks findings Blocker / Watch / Nit.
-- `pr-impact-runner`: thin dispatcher over `pr-impact-scan`. Takes a PR URL, fetches the diff, runs the impact-scan flow, returns a compact ranked report.
 
-## Requires
+## Configuration
 
-- Claude Code v2.1+ (skills / hooks support).
-- `jq` (used only for hook wiring; without it the installer skips wiring and prints manual instructions).
+`branch-guard` reads these environment variables (all optional):
 
-## Configure (environment variables, all optional)
+| Variable | Default | Effect |
+| --- | --- | --- |
+| `WW_PROTECTED_BRANCHES` | `main,master,trunk` | Branches to block writes on |
+| `WW_ALLOW_MAIN_WRITE=1` | off | Temporary bypass for CI / setup scripts |
+| `WW_STRICT=1` | off | Fail-closed: unknown branch = deny |
+| `WW_STRICT_ALLOWLIST` | `$HOME/.claude:/tmp:/var/tmp` | Paths allowed even under strict mode |
 
-- `WW_PROTECTED_BRANCHES`: branches `branch-guard` blocks. Default `main,master,trunk`.
-- `WW_ALLOW_MAIN_WRITE=1`: temporary bypass for `branch-guard` (CI / setup scripts).
-- `WW_STRICT=1`: fail-closed mode for `branch-guard`. Payloads with no `file_path`, targets outside a git repo, and unresolvable branches are **blocked** instead of allowed. Combine with `WW_STRICT_ALLOWLIST` to whitelist known-safe sinks.
-- `WW_STRICT_ALLOWLIST`: colon-separated path prefixes that stay allowed under `WW_STRICT=1`. Default `$HOME/.claude:/tmp:/var/tmp`.
 
-Default is fail-open (unchanged): if `branch-guard` cannot resolve the target's git branch, the write proceeds. Set `WW_STRICT=1` in environments where "unknown = deny" is the right policy (shared machines, CI sandboxes, review workflows).
+## Requirements
+
+- Claude Code v2.1+
+- `jq` (for hook wiring; installer prints manual instructions if missing)
 
 ## Uninstall
 
@@ -152,21 +104,7 @@ Default is fail-open (unchanged): if `branch-guard` cannot resolve the target's 
 ~/.open-claude-all/uninstall.sh
 ```
 
-Only removes items installed by this repo. Skills and hooks you created yourself are untouched.
-
-## Design principles
-
-- **Read-only fan-out is safe; write fan-out needs isolation.** `parallel-dispatch` is read; `parallel-dev` uses worktree isolation for writes.
-- **Scope discipline.** One PR / commit does not mix concerns. `pr-impact-scan` enforces this.
-- **Impact-first review.** Understanding what the new code touches comes before writing more code.
-- **Never write on protected branches.** The `branch-guard` hook blocks file edits on `main` / `master` / `trunk`.
-
-## Non-goals
-
-- Reimplementing or replacing Claude Code core.
-- A multi-agent orchestration framework.
-- A build / test wrapper for every language. Project-native commands are used as-is.
-- An interactive orchestration UI.
+Only removes what this repo installed. Your own skills and hooks are untouched.
 
 ## Contributing
 
