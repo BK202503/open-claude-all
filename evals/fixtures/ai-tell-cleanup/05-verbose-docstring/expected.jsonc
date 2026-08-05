@@ -1,0 +1,24 @@
+{
+  // Three docstring blocks, all containing only @param/@return/@throws that
+  // restate the method signature. None explain WHY. All should be removed.
+  // The summary line ("ID로 사용자를 조회합니다") is also redundant with the method name.
+  "must_flag": [
+    {
+      "line": 5,
+      "category": ["verbose-docstring"],
+      "hint": "docstring for findById restates signature only — no WHY, remove entire block"
+    },
+    {
+      "line": 13,
+      "category": ["verbose-docstring"],
+      "hint": "docstring for save restates signature only — no WHY, remove entire block"
+    },
+    {
+      "line": 22,
+      "category": ["verbose-docstring"],
+      "hint": "docstring for findAll restates return type only — remove"
+    }
+  ],
+  "must_not_flag": [],
+  "notes": "Each docstring block is one finding. The skill should propose removal, not rewrite — the user decides if a WHY comment is needed."
+}
