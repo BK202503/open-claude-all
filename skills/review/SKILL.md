@@ -1,6 +1,6 @@
 ---
 name: review
-description: Review a pull request or diff — language-aware dispatcher. Detects which file types are changed and fans out to the right specialist skills automatically. Triggers include "PR 리뷰해", "코드 리뷰해", "review this", "review my PR", "리뷰해줘". Replaces the default /review skill with a smarter routing layer.
+description: Review a pull request or diff — language-aware dispatcher. Detects which file types are changed and fans out to the right specialist skills automatically. If any must-fix findings are found, AUTO-INVOKE review-loop to apply auto-fixable corrections and re-check. Triggers include "PR 리뷰해", "코드 리뷰해", "review this", "review my PR", "리뷰해줘". Replaces the default /review skill with a smarter routing layer.
 version: 0.1.0
 ---
 

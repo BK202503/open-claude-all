@@ -1,0 +1,30 @@
+{
+  // Input has three auto-fixable findings:
+  //   line 8: em-dash in comment
+  //   line 10: code-restating-comment
+  //   line 14: code-restating-comment
+  //
+  // All three are deterministic auto-fixes.
+  // The loop should complete in exactly 1 iteration and reach clean state.
+  "max_iterations": 1,
+  "must_auto_fix": [
+    {
+      "line": 8,
+      "category": "em-dash",
+      "hint": "em dash in comment replaced with ':'"
+    },
+    {
+      "line": 10,
+      "category": "code-restating-comment",
+      "hint": "comment restates stream().sum() — removed"
+    },
+    {
+      "line": 14,
+      "category": "code-restating-comment",
+      "hint": "comment restates repository.save() — removed"
+    }
+  ],
+  "must_not_auto_fix": [],
+  "final_state": "clean",
+  "notes": "Pure auto-fixable input. Loop must not exceed 1 iteration. Final state must be clean with no needs-human items."
+}
