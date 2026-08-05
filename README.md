@@ -3,179 +3,126 @@
 [![npm](https://img.shields.io/npm/v/open-claude-all.svg)](https://www.npmjs.com/package/open-claude-all)
 [![license](https://img.shields.io/npm/l/open-claude-all.svg)](LICENSE)
 
-Claude Code skills and hooks focused on **shipping clean PRs and pre-verifying the impact on existing code**.
+Claude Code가 코드를 잘 쓰는 건 기본입니다. 이 패키지는 그 다음 단계, **PR로 내보내기 전에 놓치는 것들**을 잡아줍니다.
 
-npm: https://www.npmjs.com/package/open-claude-all
+- 리뷰어가 보기 전에 버그 패턴 미리 검출
+- AI가 쓴 티 나는 주석과 문구 자동 정리
+- protected 브랜치 직접 수정 차단
+- PR 전 영향 범위 자동 파악
 
-## Install
+---
 
-Four install paths, ordered from most managed to most manual. Pick one.
-
-| # | Path | Requires | Best for |
-| :-: | --- | --- | --- |
-| 1 | Claude Code plugin marketplace | Claude Code v2.1+ | most users — managed updates |
-| 2 | `npx` | Node 18+ | quick one-shot install |
-| 3 | `curl \| bash` | POSIX shell | no-Node environments |
-| 4 | Git clone | git | you want to read the source first |
-
-After any path, restart Claude Code, then run `/status` to confirm skills are picked up.
-
-### 1. Claude Code plugin marketplace *(recommended)*
+## 설치
 
 ```sh
-/plugin marketplace add BK202503/open-claude-all
-/plugin install open-claude-all@open-claude-all
+npx open-claude-all
 ```
 
-Auto-discovers skills, wires the `branch-guard` hook, and gets updates via `/plugin update`. Skills namespace as `/open-claude-all:<skill-name>`.
+설치 후 Claude Code를 재시작하면 자동으로 스킬이 로드됩니다.
 
-### 2. `npx`
+다른 설치 방법이 필요하다면:
 
-```sh
-npx open-claude-all               # install
-npx open-claude-all --dry-run     # preview only, change nothing
-npx open-claude-all --skip-hook   # skills only, skip branch-guard wiring
-npx open-claude-all uninstall     # reverse the install
-```
+| 방법 | 명령어 |
+| --- | --- |
+| Plugin marketplace | `/plugin marketplace add BK202503/open-claude-all` |
+| curl | `curl -fsSL https://bk202503.github.io/open-claude-all/get \| bash` |
+| Git clone | `git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all && ~/.open-claude-all/install.sh` |
 
-Pin the version: `npx open-claude-all@0.1.3`.
+버전 고정: `npx open-claude-all@0.1.3`
 
-### 3. `curl | bash`
+---
 
-```sh
-curl -fsSL https://bk202503.github.io/open-claude-all/get | bash
-```
+## 스킬 목록
 
-Downloads the latest `main` and runs `install.sh` on any POSIX shell (macOS, Linux, WSL). Forward flags after `bash -s --`:
+### PR 리뷰 파이프라인
 
-```sh
-curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --dry-run
-curl -fsSL https://bk202503.github.io/open-claude-all/get | bash -s -- --skip-hook
-```
+`/review` 하나만 실행하면 아래 스킬들이 순서대로 자동 연결됩니다.
 
-Against a moving `main`, this is a supply-chain risk. See [Pinning to a release](#pinning-to-a-release) below.
+| 스킬 | 역할 |
+| --- | --- |
+| `review` | diff에서 언어를 감지해 해당 전문 스킬로 자동 라우팅. must-fix 발견 시 `review-loop` 자동 실행. |
+| `review-loop` | 리뷰 후 확실한 항목(em dash, AI 푸터, 불필요 주석)만 자동 수정하고 재검토. 판단이 필요한 항목은 사람에게. |
+| `ai-tell-cleanup` | 코드 주석, 커밋 메시지, PR 본문의 AI 특유 패턴 제거. 코드 수정 직후 자동 실행. `"ai-tell-cleanup 끄기"`로 비활성화 가능. |
+| `pr-impact-scan` | PR 전 변경된 함수/클래스의 모든 호출부를 추적하고, 테스트 누락과 호환성 문제를 찾아 PR 본문 초안 작성. |
 
-### 4. Git clone
+### Java / Kotlin
 
-```sh
-git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all
-~/.open-claude-all/install.sh
-```
+| 스킬 | 잡아주는 것 |
+| --- | --- |
+| `jvm-memory-leak-review` | static 컬렉션 누수, ThreadLocal 미해제, 리스너 미해제, 무제한 캐시, 미닫힌 리소스, 빈 스코프 불일치, @Async 공유 상태, Kotlin Channel/Flow 누수. `.java` / `.kt` 파일 diff 시 자동 실행. |
+| `kotlin-coroutine-review` | suspend 함수 내 blocking 호출, GlobalScope 누수, Dispatcher 오용, CoroutineExceptionHandler 누락, Flow 역압 문제. |
+| `spring-kafka-listener-review` | DefaultErrorHandler 설정 오류, @RetryableTopic 함정, ack 모드, DLT 미연결, suspend @KafkaListener 버전 호환성. |
 
-### Pinning to a release
+### React / Next.js
 
-`curl | bash` and `git clone` both track `main` by default. To pin:
+| 스킬 | 잡아주는 것 |
+| --- | --- |
+| `react-hooks-review` | useEffect 의존성 배열 오류, stale closure, functional updater 누락, list key 안티패턴, async effect cleanup 누락. |
+| `nextjs-app-router-review` | 서버/클라이언트 컴포넌트 경계 오류, fetch 캐시 설정 오류, Next 15+ async params, 서버 시크릿 클라이언트 번들 유출. |
+| `frontend-perf-impact-scan` | 번들 크기 증가, LCP/CLS 위험, 네트워크 waterfall, hydration 불일치 — Blocker / Watch / Nit 등급으로 분류. |
 
-```sh
-# direct from GitHub at a tag (works once the tag is pushed):
-curl -fsSL https://raw.githubusercontent.com/BK202503/open-claude-all/v0.1.3/install.sh | bash
+### NestJS
 
-# via get.sh (planned; OCA_REF support is not yet wired in the get endpoint):
-OCA_REF=v0.1.3 curl -fsSL https://bk202503.github.io/open-claude-all/get | bash
-```
+| 스킬 | 잡아주는 것 |
+| --- | --- |
+| `nestjs-provider-review` | injection scope 오용, forwardRef로 숨겨진 순환 의존성, module exports 누락, 필터/인터셉터/파이프/가드 순서 문제. |
 
-For npm: `npx open-claude-all@0.1.3`. For the marketplace path, `/plugin update` pulls the latest published version.
+### 병렬 작업
 
-## Why use this
+독립적인 작업 여러 개를 동시에 처리할 때 씁니다.
 
-Claude Code writes code fine on its own. What it tends to miss is what happens **right before that code goes out as a PR**:
+| 스킬 | 언제 |
+| --- | --- |
+| `parallel-dev` | 코드 작성이 포함된 N개의 독립 작업. 각각 별도 git worktree에서 실행, 부모가 순서대로 머지. |
+| `parallel-dispatch` | 읽기 전용 조회 N개 동시 실행 (PR 상태 확인, 로그 조회 등). worktree 없음, 빠름. |
 
-1. **Is the PR clean?** Scope drifted, commit messages restate the diff, unrelated refactors slipped in.
-2. **What does it touch in existing code?** Every caller of a signature that changed, every reference to a renamed config key, N+1 regressions, known regression patterns.
+### 안전
 
-This repository automates those two axes:
+| 훅 | 역할 |
+| --- | --- |
+| `branch-guard` | main / master / trunk에 직접 파일 수정 시 PreToolUse 훅으로 차단. |
 
-- **(A) Clean PRs.** Scope discipline, commit style that lowers the review bar, blocking direct writes to protected branches.
-- **(B) Impact verification on existing code.** `pr-impact-scan` enumerates caller / test / config blind spots. Domain-specific review skills (Spring Kafka listener, Kotlin coroutine) catch known regression patterns before they land.
+### 에이전트
 
-Competing frameworks (oh-my-claudecode, claude-forge, etc.) focus mostly on "writing code" automation (agent orchestration, prompt injection, etc.). This project specializes in the back end: **getting the code you already wrote safely out as a PR**.
+스킬을 조합해 PR 단위로 한 번에 실행합니다.
 
-## What's inside
+| 에이전트 | 역할 |
+| --- | --- |
+| `pr-reviewer` | scope 점검, 영향 범위 파악, 커밋 스타일 검토를 한 번에. Blocker / Watch / Nit 등급 출력. |
+| `pr-impact-runner` | PR URL을 받아 `pr-impact-scan`을 실행하고 요약 리포트 반환. |
 
-### Impact and PR quality (general)
+---
 
-- `pr-impact-scan`: enumerate every caller of changed functions / classes / config keys, judge signature compatibility, compute test coverage delta, draft PR body.
-- `parallel-dispatch`: parallel read (status / lookup) fan-out.
-- `parallel-dev`: worktree-isolated parallel development (write).
-- `branch-guard`: block direct writes to `main` / `master` / `trunk` (backed by a PreToolUse hook).
-- `review`: language-aware PR review dispatcher. Scans the diff for file types and fans out to the right specialist skills automatically (`jvm-memory-leak-review`, `kotlin-coroutine-review`, `spring-kafka-listener-review`, `react-hooks-review`, `nestjs-provider-review`). AUTO-INVOKEs `review-loop` when must-fix findings are found.
-- `ai-tell-cleanup`: detects and fixes AI writing tells in code comments, commit messages, and PR bodies — em dashes, code-restating comments, filler phrases ("Note that", "This ensures that"), section-separator noise, verbose docstrings. AUTO-INVOKEs after Write/Edit tool calls and before commits. Opt out with `"ai-tell-cleanup 끄기"`.
-- `review-loop`: iterative review → auto-fix → re-check loop. Auto-fixes only deterministic findings (em dashes, AI footers, section separators, code-restating comments), re-runs review, repeats until clean or 5 iterations max. Passes anything requiring judgment to the user unchanged.
+## 설정
 
-### `parallel-dispatch` vs `parallel-dev` — when to use which
+`branch-guard` 동작은 환경 변수로 조정합니다 (모두 선택 사항).
 
-Same "fan out N subagents in one response" shape, different safety envelope.
+| 변수 | 기본값 | 설명 |
+| --- | --- | --- |
+| `WW_PROTECTED_BRANCHES` | `main,master,trunk` | 차단할 브랜치 목록 |
+| `WW_ALLOW_MAIN_WRITE=1` | 꺼짐 | 임시 우회 (CI, 설정 스크립트용) |
+| `WW_STRICT=1` | 꺼짐 | 엄격 모드: 브랜치 불명확 시 차단 |
+| `WW_STRICT_ALLOWLIST` | `$HOME/.claude:/tmp:/var/tmp` | 엄격 모드에서도 허용할 경로 |
 
-- **Read fan-out → `parallel-dispatch`.** No worktree, no writes, no isolation. Example:
-  - *"Check the status of PR #22536, #4523, and #18103 in parallel"* → three read-only subagents fan out, each calls `gh pr view`, results are aggregated in one reply.
-- **Write fan-out → `parallel-dev`.** Each unit gets its own git worktree, file scopes must be non-overlapping, and the parent merges branches back sequentially after reviewing each diff. Example:
-  - *"Build the login page, the settings page, and the API client at once"* → three worktree-isolated `general-purpose` agents, disjoint directories, sequential `--no-ff` merge back to base.
+---
 
-Rule of thumb: if any unit writes to disk, use `parallel-dev`. If every unit is read-only, use `parallel-dispatch`.
+## 요구 사항
 
-### Kotlin / JVM Spring track
+- Claude Code v2.1 이상
+- `jq` (훅 연결용. 없으면 설치 시 수동 안내로 대체)
 
-- `spring-kafka-listener-review`: catches known regression patterns around `DefaultErrorHandler`, `@RetryableTopic`, ack mode, DLT wiring, suspend `@KafkaListener` version gaps, and more.
-- `kotlin-coroutine-review`: structured-concurrency violations, blocking-in-suspend, dispatcher misuse, `GlobalScope` leaks, missing `CoroutineExceptionHandler`, and more.
-- `jvm-memory-leak-review`: 9-phase structured review for JVM memory leak patterns in Java/Kotlin Spring Boot — static collection accumulation, ThreadLocal cleanup, listener lifecycle, unbounded caches, unclosed resources, bean scope mismatch, `@Async` shared state, Kotlin Channel/Flow pitfalls. AUTO-INVOKEs during any PR review that touches `.java` or `.kt` files.
-
-### React / Next.js track
-
-- `react-hooks-review`: `useEffect` dep-array bugs, stale closures, functional-updater misses, over-memoization, list-key anti-patterns, async-effect cleanup leaks, silent Rules-of-Hooks violations.
-- `nextjs-app-router-review`: server / client component boundary mistakes, `fetch` cache and revalidate misuse, async `params` / `searchParams` in Next 15+, server-only secrets leaking into client bundles, hydration mismatches, route handler pitfalls.
-- `frontend-perf-impact-scan`: the frontend counterpart to `pr-impact-scan`. Enumerates concrete perf regressions in a diff (bundle bloat, LCP / CLS risks, network waterfalls, hydration mismatch surface) and ranks them Blocker / Watch / Nit before you PR.
-
-### NestJS track
-
-- `nestjs-provider-review`: injection-scope misuse, circular deps hidden by `forwardRef`, missing module `exports`, exception-filter / interceptor / pipe / guard ordering pitfalls, async-provider typing gaps.
-
-### Agents
-
-Agents wrap the skills above for one-shot invocation against a concrete PR.
-
-- `pr-reviewer`: opinionated PR reviewer aligned with this repo's clean-PR philosophy. Checks scope discipline, impact enumeration, commit hygiene, and AI-attribution rules. Ranks findings Blocker / Watch / Nit.
-- `pr-impact-runner`: thin dispatcher over `pr-impact-scan`. Takes a PR URL, fetches the diff, runs the impact-scan flow, returns a compact ranked report.
-
-## Requires
-
-- Claude Code v2.1+ (skills / hooks support).
-- `jq` (used only for hook wiring; without it the installer skips wiring and prints manual instructions).
-
-## Configure (environment variables, all optional)
-
-- `WW_PROTECTED_BRANCHES`: branches `branch-guard` blocks. Default `main,master,trunk`.
-- `WW_ALLOW_MAIN_WRITE=1`: temporary bypass for `branch-guard` (CI / setup scripts).
-- `WW_STRICT=1`: fail-closed mode for `branch-guard`. Payloads with no `file_path`, targets outside a git repo, and unresolvable branches are **blocked** instead of allowed. Combine with `WW_STRICT_ALLOWLIST` to whitelist known-safe sinks.
-- `WW_STRICT_ALLOWLIST`: colon-separated path prefixes that stay allowed under `WW_STRICT=1`. Default `$HOME/.claude:/tmp:/var/tmp`.
-
-Default is fail-open (unchanged): if `branch-guard` cannot resolve the target's git branch, the write proceeds. Set `WW_STRICT=1` in environments where "unknown = deny" is the right policy (shared machines, CI sandboxes, review workflows).
-
-## Uninstall
+## 제거
 
 ```sh
 ~/.open-claude-all/uninstall.sh
 ```
 
-Only removes items installed by this repo. Skills and hooks you created yourself are untouched.
+이 패키지가 설치한 것만 제거합니다. 직접 만든 스킬과 훅은 건드리지 않습니다.
 
-## Design principles
+## 기여
 
-- **Read-only fan-out is safe; write fan-out needs isolation.** `parallel-dispatch` is read; `parallel-dev` uses worktree isolation for writes.
-- **Scope discipline.** One PR / commit does not mix concerns. `pr-impact-scan` enforces this.
-- **Impact-first review.** Understanding what the new code touches comes before writing more code.
-- **Never write on protected branches.** The `branch-guard` hook blocks file edits on `main` / `master` / `trunk`.
+PR은 `dev` 브랜치로 보내주세요. 자세한 규칙은 [`CONTRIBUTING.md`](CONTRIBUTING.md)를 참고하세요.
 
-## Non-goals
+## 라이선스
 
-- Reimplementing or replacing Claude Code core.
-- A multi-agent orchestration framework.
-- A build / test wrapper for every language. Project-native commands are used as-is.
-- An interactive orchestration UI.
-
-## Contributing
-
-PRs target the `dev` branch. Full rules in [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
-## License
-
-MIT. See `LICENSE`.
+MIT. `LICENSE` 파일 참조.
