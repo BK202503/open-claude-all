@@ -29,7 +29,7 @@ To pin a version: `npx open-claude-all@0.1.3`
 
 ### PR review pipeline
 
-Run `/review` — the skills below chain together automatically.
+Run `/review` and the skills below chain together automatically.
 
 | Skill | What it does |
 | --- | --- |
@@ -52,7 +52,7 @@ Run `/review` — the skills below chain together automatically.
 | --- | --- |
 | `react-hooks-review` | `useEffect` dep-array bugs, stale closures, functional-updater misses, list-key anti-patterns, async-effect cleanup leaks. |
 | `nextjs-app-router-review` | Server/client component boundary mistakes, `fetch` cache misuse, async params in Next 15+, server secrets leaking into client bundles. |
-| `frontend-perf-impact-scan` | Bundle bloat, LCP/CLS risks, network waterfalls, hydration mismatch — ranked Blocker / Watch / Nit. |
+| `frontend-perf-impact-scan` | Bundle bloat, LCP/CLS risks, network waterfalls, hydration mismatch. Ranked Blocker / Watch / Nit. |
 
 ### NestJS
 
@@ -96,7 +96,7 @@ Run `/review` — the skills below chain together automatically.
 ## Requirements
 
 - Claude Code v2.1+
-- `jq` (for hook wiring — installer prints manual instructions if missing)
+- `jq` (for hook wiring; installer prints manual instructions if missing)
 
 ## Uninstall
 
