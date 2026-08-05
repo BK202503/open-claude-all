@@ -3,11 +3,7 @@
 [![npm](https://img.shields.io/npm/v/open-claude-all.svg)](https://www.npmjs.com/package/open-claude-all)
 [![license](https://img.shields.io/npm/l/open-claude-all.svg)](LICENSE)
 
-Claude Code handles writing code. This package covers what comes next — **catching issues before the PR lands**.
-
-- Detect bug patterns before reviewers do
-- Block direct writes to protected branches
-- Map the blast radius of a change before opening a PR
+Harness engineering for Claude Code. Skills and hooks that catch issues before PRs land, block unsafe writes, and map the blast radius of every change.
 
 
 ## Install
