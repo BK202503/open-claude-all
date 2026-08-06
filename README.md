@@ -79,6 +79,7 @@ Run `/review` and the skills below chain together automatically.
 | --- | --- |
 | `pr-reviewer` | Checks scope discipline, impact enumeration, and commit hygiene in one shot. Ranks findings Blocker / Watch / Nit. |
 | `pr-impact-runner` | Takes a PR URL, runs `pr-impact-scan`, returns a compact ranked report. |
+| `review-runner` | Runs one of the language-specific review skills in an isolated subagent with no `Write`/`Edit` access, so the review can't inherit the implementing session's bias or modify the code it's reviewing. Dispatched by the `review` skill's Phase 3. |
 
 
 ## Configuration

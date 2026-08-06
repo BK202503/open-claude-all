@@ -1,6 +1,6 @@
 ---
 name: review
-description: Review a pull request or diff — language-aware dispatcher. Detects which file types are changed and fans out to the right specialist skills automatically. If any must-fix findings are found, AUTO-INVOKE review-loop to apply auto-fixable corrections and re-check. Triggers include "PR 리뷰해", "코드 리뷰해", "review this", "review my PR", "리뷰해줘". Replaces the default /review skill with a smarter routing layer.
+description: Review a pull request or diff — language-aware dispatcher. Detects which file types are changed and fans out to the right specialist skills automatically, each run in an isolated subagent (via the `review-runner` agent) so the review doesn't inherit the implementing session's bias. If any must-fix findings are found, AUTO-INVOKE review-loop to apply auto-fixable corrections and re-check. Triggers include "PR 리뷰해", "코드 리뷰해", "review this", "review my PR", "리뷰해줘". Replaces the default /review skill with a smarter routing layer.
 version: 0.1.0
 ---
 
@@ -42,10 +42,24 @@ gh pr view --json baseRefName -q .baseRefName 2>/dev/null
 - 명백한 로직 오류, 하드코딩된 값, 보안 이슈 (SQL injection, XSS, secret 노출) 체크
 - 테스트 커버리지 갭 확인
 
-## Phase 3 — Language-specific dispatch
+## Phase 3 — Language-specific dispatch (subagent)
 
-Phase 1에서 감지된 파일 타입에 따라 아래 스킬을 추가로 실행합니다.  
-복수의 언어가 감지되면 모두 실행합니다.
+Phase 1에서 감지된 파일 타입에 따라 아래 스킬을 **`review-runner` 에이전트를 통해 독립된 subagent에서** 실행합니다.
+복수의 언어가 감지되면 모두 실행하되, 서로 의존하지 않으므로 병렬로 호출합니다.
+
+**왜 전용 agent인가:** 지금 이 세션이 방금 구현/수정한 코드를 그대로 리뷰까지 하면, 자신이 내린 설계 판단을 스스로 정당화하며 문제를 놓치기 쉽습니다. `review-runner`는 이 대화의 이전 맥락을 전혀 상속받지 않고, 게다가 `Write`/`Edit` 도구가 아예 없어서 "리뷰만 하고 코드는 건드리지 않는다"는 제약이 프롬프트 지시가 아니라 도구 레벨에서 보장됩니다 (범용 `general-purpose`는 tools가 전체라 이 보장이 없음).
+
+각 dispatch는 아래 형태로 호출합니다:
+
+```
+Agent(
+  subagent_type: "review-runner",
+  description: "<skill-name> 리뷰",
+  prompt: "skill: <skill-name>\nfiles: <대상 파일 목록>\ndiff: git diff <base>...HEAD -- <경로>"
+)
+```
+
+`<skill-name>` 자리에는 아래 각 항목에서 지정한 스킬 이름을 넣습니다.
 
 ### Java / Kotlin 파일이 있는 경우 → jvm-memory-leak-review
 
@@ -91,7 +105,7 @@ git diff $(git merge-base HEAD main)...HEAD | grep -l "@KafkaListener"
 
 ## Phase 4 — Aggregate findings
 
-각 스킬의 결과를 하나의 리포트로 합칩니다:
+각 subagent(`review-runner`)의 결과를 하나의 리포트로 합칩니다:
 
 ```
 ## PR Review — <브랜치명>
