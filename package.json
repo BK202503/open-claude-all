@@ -1,6 +1,6 @@
 {
   "name": "open-claude-all",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Claude Code skills and hooks for shipping clean PRs and pre-verifying impact on existing code.",
   "bin": {
     "open-claude-all": "bin/cli.mjs"

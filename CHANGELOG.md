@@ -5,6 +5,15 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2026-08-06
+
+### Added
+- `jvm-memory-leak-review` skill: Java/Kotlin (Spring Boot) memory leak patterns — static collection accumulation, ThreadLocal leaks, unregistered listeners, unbounded caches, unclosed resources, bean lifecycle mismatches, `@Async`/`CompletableFuture` shared state, Kotlin `Channel`/`Flow` backpressure.
+- `review` skill: language-aware PR review dispatcher. Detects changed file types and fans out to specialist review skills automatically.
+- `ai-tell-cleanup` skill: catches AI-tell patterns in code (em-dashes in comments, code-restating comments, filler phrases, section separators, verbose docstrings). Eval fixtures included.
+- `review-loop` skill: applies auto-fixable review findings and re-runs review until clean. Wired into `review` skill as AUTO-INVOKE. Eval fixtures included.
+- README rewrite: table-based layout with harness engineering framing.
+
 ## [0.1.3] - 2026-07-28
 
 ### Added
