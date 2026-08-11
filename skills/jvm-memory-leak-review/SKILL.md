@@ -2,6 +2,9 @@
 name: jvm-memory-leak-review
 description: Review Java/Kotlin (Spring Boot) code before PR for JVM memory leak patterns — static collection accumulation, ThreadLocal not removed, listener not unregistered, unbounded caches, unclosed resources, @Async-scoped shared state, and bean-lifecycle reference escapes. AUTO-INVOKE during any PR review or code review when the diff contains .java or .kt files. Triggers include "메모리 릭 검사해", "review for memory leak", "check this for OOM", "heap keeps growing", "GC keeps running", "코드 리뷰", "PR 리뷰".
 version: 0.1.0
+context: fork
+agent: diff-scoped-reviewer
+background: false
 ---
 
 # jvm-memory-leak-review
