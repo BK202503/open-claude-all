@@ -79,6 +79,7 @@ Run `/review` and the skills below chain together automatically.
 | --- | --- |
 | `pr-reviewer` | Checks scope discipline, impact enumeration, and commit hygiene in one shot. Ranks findings Blocker / Watch / Nit. |
 | `pr-impact-runner` | Takes a PR URL, runs `pr-impact-scan`, returns a compact ranked report. |
+| `diff-scoped-reviewer` | Read-only agent used via `context: fork` by the language-specific review skills. Determines its own diff scope (base branch → changed files → matching extensions) before applying the invoking skill's checklist, so it never scans the whole repo and can't modify the code it's reviewing. |
 
 
 ## Configuration

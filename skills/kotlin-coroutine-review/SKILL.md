@@ -2,6 +2,9 @@
 name: kotlin-coroutine-review
 description: Review Kotlin coroutine usage (typically in Spring Boot / Ktor code) for structured-concurrency violations, blocking calls inside suspend functions, dispatcher misuse, GlobalScope leaks, missing CoroutineExceptionHandler, and Job/Deferred lifecycle bugs. Triggers include "review this coroutine code", "why does my suspend function block", "kotlin async review", "am I using GlobalScope right".
 version: 0.1.0
+context: fork
+agent: diff-scoped-reviewer
+background: false
 ---
 
 # kotlin-coroutine-review

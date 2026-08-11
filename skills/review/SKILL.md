@@ -1,6 +1,6 @@
 ---
 name: review
-description: Review a pull request or diff — language-aware dispatcher. Detects which file types are changed and fans out to the right specialist skills automatically. If any must-fix findings are found, AUTO-INVOKE review-loop to apply auto-fixable corrections and re-check. Triggers include "PR 리뷰해", "코드 리뷰해", "review this", "review my PR", "리뷰해줘". Replaces the default /review skill with a smarter routing layer.
+description: Review a pull request or diff — language-aware dispatcher. Detects which file types are changed and fans out to the right specialist skills automatically. Each specialist skill runs itself as an isolated subagent and determines its own diff scope, so the review doesn't inherit the implementing session's bias and never scans the whole repo. If any must-fix findings are found, AUTO-INVOKE review-loop to apply auto-fixable corrections and re-check. Triggers include "PR 리뷰해", "코드 리뷰해", "review this", "review my PR", "리뷰해줘". Replaces the default /review skill with a smarter routing layer.
 version: 0.1.0
 ---
 
@@ -42,10 +42,9 @@ gh pr view --json baseRefName -q .baseRefName 2>/dev/null
 - 명백한 로직 오류, 하드코딩된 값, 보안 이슈 (SQL injection, XSS, secret 노출) 체크
 - 테스트 커버리지 갭 확인
 
-## Phase 3 — Language-specific dispatch
+## Phase 3 — Language-specific dispatch (subagent)
 
-Phase 1에서 감지된 파일 타입에 따라 아래 스킬을 추가로 실행합니다.  
-복수의 언어가 감지되면 모두 실행합니다.
+Phase 1에서 감지된 파일 타입에 따라 아래 스킬을 `Skill` 도구로 호출합니다. 복수의 언어가 감지되면 모두 병렬로 호출합니다.
 
 ### Java / Kotlin 파일이 있는 경우 → jvm-memory-leak-review
 
@@ -91,7 +90,7 @@ git diff $(git merge-base HEAD main)...HEAD | grep -l "@KafkaListener"
 
 ## Phase 4 — Aggregate findings
 
-각 스킬의 결과를 하나의 리포트로 합칩니다:
+각 subagent(forked skill)의 결과를 하나의 리포트로 합칩니다:
 
 ```
 ## PR Review — <브랜치명>

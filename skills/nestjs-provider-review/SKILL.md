@@ -2,6 +2,9 @@
 name: nestjs-provider-review
 description: Review NestJS module / provider / dependency-injection code before you PR for common regressions. Injection scope misuse (DEFAULT vs REQUEST vs TRANSIENT), circular module dependencies masked by `forwardRef`, missing `exports` in module definitions, exception filter / interceptor / pipe / guard ordering, and async-provider typing gaps. Triggers include "review this NestJS code", "check my module wiring", "why is my provider undefined", "nest DI review".
 version: 0.1.0
+context: fork
+agent: diff-scoped-reviewer
+background: false
 ---
 
 # nestjs-provider-review

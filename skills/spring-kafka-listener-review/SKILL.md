@@ -2,6 +2,9 @@
 name: spring-kafka-listener-review
 description: Review a Spring Kafka listener (Java or Kotlin) for common pitfalls before you PR — unbounded async retry, silent record loss on same-partition failures, misconfigured DefaultErrorHandler + RetryTopicConfiguration, missing DLT wiring, suspend @KafkaListener support gaps by version, ack strategy correctness, and consumer-side idempotency assumptions. Triggers include "review my Kafka listener", "check this @KafkaListener", "why does my listener retry forever", "suspend listener retry not working".
 version: 0.1.0
+context: fork
+agent: diff-scoped-reviewer
+background: false
 ---
 
 # spring-kafka-listener-review
