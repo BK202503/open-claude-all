@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # open-claude-all installer.
-# Copies skills, agents, and hooks into ~/.claude and wires the branch-guard hook into settings.json.
+# Installs Claude Code or Codex CLI assets without mixing their configuration roots.
 # Idempotent (rsync); safe to re-run.
 #
 # Usage:
-#   ./install.sh                # install everything
+#   ./install.sh                # install Claude Code assets (backward compatible)
+#   ./install.sh --target codex # install Codex CLI skills only
+#   ./install.sh --target both  # install assets for both CLIs
 #   ./install.sh --dry-run      # print what would happen, do nothing
 #   ./install.sh --skip-hook    # skills + agents only, no hook wiring
 
@@ -12,10 +14,14 @@ set -euo pipefail
 
 DRY=0
 SKIP_HOOK=0
+TARGET=claude
 for arg in "$@"; do
     case "$arg" in
         --dry-run)   DRY=1 ;;
         --skip-hook) SKIP_HOOK=1 ;;
+        --target=claude) TARGET=claude ;;
+        --target=codex) TARGET=codex ;;
+        --target=both) TARGET=both ;;
         --help|-h)
             grep '^#' "$0" | head -20
             exit 0
@@ -26,6 +32,7 @@ done
 
 repo_root="$(cd "$(dirname "$0")" && pwd)"
 claude_dir="$HOME/.claude"
+codex_dir="${CODEX_HOME:-$HOME/.codex}"
 
 # run: execute argv directly (no eval / no shell reparse).
 # For DRY, print a shell-quoted preview of what would run.
@@ -39,6 +46,7 @@ run() {
     fi
 }
 
+install_claude() {
 echo "==> installing to $claude_dir"
 run mkdir -p "$claude_dir/skills" "$claude_dir/agents" "$claude_dir/hooks"
 
@@ -66,7 +74,7 @@ run chmod +x "$claude_dir/hooks/branch-guard.sh"
 
 if [ "$SKIP_HOOK" = 1 ]; then
     echo "==> --skip-hook — not wiring branch-guard into settings.json"
-    exit 0
+    return
 fi
 
 echo "==> wiring branch-guard into $claude_dir/settings.json"
@@ -93,7 +101,7 @@ if ! command -v jq >/dev/null 2>&1; then
       }
     }
 EOF
-    exit 0
+    return
 fi
 
 already="$(jq '.hooks.PreToolUse // [] | map(select(.matcher // "" | contains("Write"))) | length' "$claude_dir/settings.json" 2>/dev/null || echo 0)"
@@ -114,3 +122,52 @@ fi
 
 echo
 echo "done. Restart your Claude Code session to load the new skills."
+}
+
+install_codex() {
+    echo "==> installing Codex CLI assets to $codex_dir"
+    run mkdir -p "$codex_dir/skills" "$codex_dir/hooks"
+    shopt -s nullglob
+    for src in "$repo_root/codex/skills/"*/; do
+        name="$(basename "$src")"
+        dst="$codex_dir/skills/$name"
+        if [ -d "$dst" ]; then
+            echo "    skill '$name' already present — merging (rsync)."
+        fi
+        run rsync -a --delete "$src" "$dst/"
+    done
+    shopt -u nullglob
+    echo "==> Codex CLI hooks"
+    run cp "$repo_root/codex/hooks/branch-guard.sh" "$codex_dir/hooks/branch-guard.sh"
+    run chmod +x "$codex_dir/hooks/branch-guard.sh"
+    if [ "$SKIP_HOOK" = 1 ]; then
+        echo "==> --skip-hook — not wiring Codex branch-guard"
+    elif ! command -v jq >/dev/null 2>&1; then
+        echo "!! jq not installed. Add the Codex branch-guard entry from codex/hooks/hooks.json manually."
+    elif [ "$DRY" = 1 ]; then
+        echo "DRY: would merge Codex branch-guard into $codex_dir/hooks.json"
+    else
+        hooks_file="$codex_dir/hooks.json"
+        [ -f "$hooks_file" ] || printf '{"hooks":{}}\n' > "$hooks_file"
+        tmp="$(mktemp)"
+        jq --arg command "$codex_dir/hooks/branch-guard.sh" '
+            .hooks = (.hooks // {}) |
+            .hooks.PreToolUse = (.hooks.PreToolUse // []) |
+            if ([.hooks.PreToolUse[]?.hooks[]?.command] | index($command))
+            then .
+            else .hooks.PreToolUse += [{hooks: [{type: "command", command: $command, timeout: 10}]}]
+            end
+        ' "$hooks_file" > "$tmp" && mv "$tmp" "$hooks_file"
+        echo "    wired. Codex will request hook trust on first use."
+    fi
+    echo "done. Start a new Codex CLI session to use the installed skills."
+}
+
+case "$TARGET" in
+    claude) install_claude ;;
+    codex) install_codex ;;
+    both)
+        install_claude
+        install_codex
+        ;;
+esac

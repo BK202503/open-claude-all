@@ -10,6 +10,7 @@
     "skills/",
     "agents/",
     "hooks/",
+    "codex/",
     ".claude-plugin/",
     "install.sh",
     "uninstall.sh",

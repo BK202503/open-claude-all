@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex NestJS Provider Review"
+  short_description: "Find dependency-injection regressions in changed NestJS code."
+  default_prompt: "Use $codex-nestjs-provider-review to review changed NestJS provider code."

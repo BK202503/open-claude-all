@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex React Hooks Review"
+  short_description: "Find React hook regressions in changed JSX and TSX."
+  default_prompt: "Use $codex-react-hooks-review to review changed React hook code."
