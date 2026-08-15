@@ -23,6 +23,14 @@ setup() {
     [[ "$output" != *"    wired."* ]]
 }
 
+@test "install.sh --target codex --dry-run installs only Codex skills" {
+    run bash "$REPO_ROOT/install.sh" --target=codex --dry-run
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Codex CLI skills"* ]]
+    [[ "$output" == *"codex-project-policy"* ]]
+    [[ "$output" != *"wiring branch-guard"* ]]
+}
+
 @test "install.sh --help prints usage and exits 0" {
     run bash "$REPO_ROOT/install.sh" --help
     [ "$status" -eq 0 ]

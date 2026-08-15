@@ -7,21 +7,20 @@ import { existsSync } from "node:fs";
 const pkgRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 
-const HELP = `open-claude-all: Claude Code skills + hooks installer
+const HELP = `open-claude-all: Claude Code and Codex CLI skills installer
 
 Usage:
-  npx open-claude-all [install] [--dry-run] [--skip-hook]
-  npx open-claude-all uninstall [--dry-run]
+  npx open-claude-all [install] [--target claude|codex|both] [--dry-run] [--skip-hook]
+  npx open-claude-all uninstall [--target claude|codex|both] [--dry-run]
 
 Commands:
-  install     (default) copy skills, agents, hooks into ~/.claude
-              and wire the branch-guard PreToolUse hook.
-  uninstall   remove skills, agents, hooks installed by this package
-              and unwire the branch-guard hook.
+  install     (default: --target claude) install assets for the selected CLI.
+  uninstall   (default: --target claude) remove assets for the selected CLI.
 
 Options:
   --dry-run   print what would happen, change nothing.
   --skip-hook (install only) skip branch-guard hook wiring.
+  --target    select claude, codex, or both (default: claude).
   -h, --help  show this help.
 `;
 
