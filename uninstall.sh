@@ -1,19 +1,25 @@
 #!/usr/bin/env bash
 # open-claude-all uninstaller.
-# Removes skills, agents, and the branch-guard hook installed by install.sh.
+# Removes Claude Code or Codex CLI assets installed by install.sh.
 # Does NOT touch skills/agents you created yourself — only removes the
 # names shipped by this repo.
 #
 # Usage:
-#   ./uninstall.sh            # remove everything installed by this repo
+#   ./uninstall.sh            # remove Claude Code assets (backward compatible)
+#   ./uninstall.sh --target codex
+#   ./uninstall.sh --target both
 #   ./uninstall.sh --dry-run  # print what would happen, do nothing
 
 set -euo pipefail
 
 DRY=0
+TARGET=claude
 for arg in "$@"; do
     case "$arg" in
         --dry-run)   DRY=1 ;;
+        --target=claude) TARGET=claude ;;
+        --target=codex) TARGET=codex ;;
+        --target=both) TARGET=both ;;
         --help|-h)
             grep '^#' "$0" | head -12
             exit 0
@@ -24,6 +30,7 @@ done
 
 repo_root="$(cd "$(dirname "$0")" && pwd)"
 claude_dir="$HOME/.claude"
+codex_dir="${CODEX_HOME:-$HOME/.codex}"
 
 # run: execute argv directly (no eval / no shell reparse).
 run() {
@@ -36,6 +43,7 @@ run() {
     fi
 }
 
+uninstall_claude() {
 echo "==> removing skills"
 shopt -s nullglob
 for src in "$repo_root/skills/"*/; do
@@ -81,3 +89,28 @@ fi
 
 echo
 echo "done. Restart your Claude Code session for the changes to take effect."
+}
+
+uninstall_codex() {
+    echo "==> removing Codex CLI skills"
+    shopt -s nullglob
+    for src in "$repo_root/codex/skills/"*/; do
+        name="$(basename "$src")"
+        dst="$codex_dir/skills/$name"
+        if [ -d "$dst" ]; then
+            run rm -rf "$dst"
+        fi
+    done
+    shopt -u nullglob
+    echo
+    echo "done. Start a new Codex CLI session for the removal to take effect."
+}
+
+case "$TARGET" in
+    claude) uninstall_claude ;;
+    codex) uninstall_codex ;;
+    both)
+        uninstall_claude
+        uninstall_codex
+        ;;
+esac
