@@ -1,0 +1,4 @@
+interface:
+  display_name: "Open Claude All Policy"
+  short_description: "Apply this package’s safe Git and review conventions."
+  default_prompt: "Use $codex-project-policy before working in this repository."
