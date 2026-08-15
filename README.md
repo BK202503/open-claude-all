@@ -24,6 +24,27 @@ Other install paths:
 
 To pin a version: `npx open-claude-all@0.1.3`
 
+### Codex CLI
+
+Install only the Codex CLI assets without changing Claude Code settings:
+
+```sh
+npx open-claude-all --target codex
+```
+
+Install both CLIs explicitly:
+
+```sh
+npx open-claude-all --target both
+```
+
+Claude Code assets install under `~/.claude`; Codex CLI assets install under
+`${CODEX_HOME:-~/.codex}`. They do not share settings, hooks, or skills.
+
+Codex CLI support currently includes `codex-project-policy`, `codex-review`,
+`codex-pr-impact-scan`, and the JVM, Kotlin coroutine, Spring Kafka, React,
+Next.js, and NestJS reviewers. Invoke a skill with `$skill-name` in Codex.
+
 
 ## What's inside
 
