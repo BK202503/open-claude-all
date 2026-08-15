@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Diff Review"
+  short_description: "Review the current diff by changed language and framework."
+  default_prompt: "Use $codex-review to review the current change set."
