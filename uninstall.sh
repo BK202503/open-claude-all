@@ -102,6 +102,9 @@ uninstall_codex() {
         fi
     done
     shopt -u nullglob
+    if [ -f "$codex_dir/hooks/branch-guard.sh" ]; then
+        run rm "$codex_dir/hooks/branch-guard.sh"
+    fi
     echo
     echo "done. Start a new Codex CLI session for the removal to take effect."
 }
