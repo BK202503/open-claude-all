@@ -3,16 +3,17 @@
 [![npm](https://img.shields.io/npm/v/open-claude-all.svg)](https://www.npmjs.com/package/open-claude-all)
 [![license](https://img.shields.io/npm/l/open-claude-all.svg)](LICENSE)
 
-Harness engineering for Claude Code. Skills and hooks that catch issues before PRs land, block unsafe writes, and map the blast radius of every change.
+Harness engineering for Claude Code and Codex CLI. Skills and hooks that catch issues before PRs land, block unsafe writes, and map the blast radius of every change.
 
 
 ## Install
 
 ```sh
-npx open-claude-all
+npx open-claude-all # Claude Code (default)
 ```
 
-Restart Claude Code after install, then run `/status` to confirm skills are active.
+Restart the selected CLI after install. In Claude Code, run `/status` to confirm
+skills are active.
 
 Other install paths:
 | Path | Command |
@@ -23,9 +24,10 @@ Other install paths:
 
 To pin a version: `npx open-claude-all@0.1.3`
 
-### Codex CLI
+### Choose a CLI
 
-Install only the Codex CLI assets without changing Claude Code settings:
+The default installs Claude Code assets. Install only the Codex CLI assets
+without changing Claude Code settings:
 
 ```sh
 npx open-claude-all --target codex
