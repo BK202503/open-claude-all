@@ -26,7 +26,7 @@ setup() {
 @test "install.sh --target codex --dry-run installs only Codex skills" {
     run bash "$REPO_ROOT/install.sh" --target=codex --dry-run
     [ "$status" -eq 0 ]
-    [[ "$output" == *"Codex CLI skills"* ]]
+    [[ "$output" == *"Codex CLI assets"* ]]
     [[ "$output" == *"codex-project-policy"* ]]
     [[ "$output" == *"Codex CLI hooks"* ]]
     [[ "$output" == *"would merge Codex branch-guard"* ]]
