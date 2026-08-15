@@ -15,7 +15,6 @@ npx open-claude-all
 Restart Claude Code after install, then run `/status` to confirm skills are active.
 
 Other install paths:
-
 | Path | Command |
 | --- | --- |
 | Plugin marketplace | `/plugin marketplace add BK202503/open-claude-all` |
