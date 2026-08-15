@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex JVM Leak Review"
+  short_description: "Find JVM and Spring memory leak patterns in changed code."
+  default_prompt: "Use $codex-jvm-memory-leak-review to review changed Java or Kotlin files."
