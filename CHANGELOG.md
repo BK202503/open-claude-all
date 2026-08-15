@@ -5,6 +5,12 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2026-08-15
+
+### Added
+- Codex CLI installation target (`--target codex` and `--target both`) with a separate `~/.codex` asset root.
+- Codex CLI protected-branch hook, diff review dispatcher, PR impact scan, and JVM, Kotlin, Spring Kafka, React, Next.js, and NestJS reviewers.
+
 ## [0.1.4] - 2026-08-06
 
 ### Added
