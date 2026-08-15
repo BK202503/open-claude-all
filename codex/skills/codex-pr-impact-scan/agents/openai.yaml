@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex PR Impact Scan"
+  short_description: "Trace impact and test gaps for the current Git change set."
+  default_prompt: "Use $codex-pr-impact-scan to assess the impact of the current change set."
