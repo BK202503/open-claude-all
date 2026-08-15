@@ -11,6 +11,7 @@ setup() {
     [ "$status" -eq 0 ]
     [[ "$output" == *"removing Codex CLI skills"* ]]
     [[ "$output" != *"unwiring branch-guard"* ]]
+    [[ "$output" != *"unwiring branch-guard"* ]]
 }
 
 @test "uninstall.sh --dry-run exits 0" {

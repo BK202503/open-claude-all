@@ -28,6 +28,8 @@ setup() {
     [ "$status" -eq 0 ]
     [[ "$output" == *"Codex CLI skills"* ]]
     [[ "$output" == *"codex-project-policy"* ]]
+    [[ "$output" == *"Codex CLI hooks"* ]]
+    [[ "$output" == *"would merge Codex branch-guard"* ]]
     [[ "$output" != *"wiring branch-guard"* ]]
 }
 
