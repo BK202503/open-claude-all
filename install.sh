@@ -125,8 +125,8 @@ echo "done. Restart your Claude Code session to load the new skills."
 }
 
 install_codex() {
-    echo "==> installing Codex CLI skills to $codex_dir"
-    run mkdir -p "$codex_dir/skills"
+    echo "==> installing Codex CLI assets to $codex_dir"
+    run mkdir -p "$codex_dir/skills" "$codex_dir/hooks"
     shopt -s nullglob
     for src in "$repo_root/codex/skills/"*/; do
         name="$(basename "$src")"
@@ -137,6 +137,29 @@ install_codex() {
         run rsync -a --delete "$src" "$dst/"
     done
     shopt -u nullglob
+    echo "==> Codex CLI hooks"
+    run cp "$repo_root/codex/hooks/branch-guard.sh" "$codex_dir/hooks/branch-guard.sh"
+    run chmod +x "$codex_dir/hooks/branch-guard.sh"
+    if [ "$SKIP_HOOK" = 1 ]; then
+        echo "==> --skip-hook — not wiring Codex branch-guard"
+    elif ! command -v jq >/dev/null 2>&1; then
+        echo "!! jq not installed. Add the Codex branch-guard entry from codex/hooks/hooks.json manually."
+    elif [ "$DRY" = 1 ]; then
+        echo "DRY: would merge Codex branch-guard into $codex_dir/hooks.json"
+    else
+        hooks_file="$codex_dir/hooks.json"
+        [ -f "$hooks_file" ] || printf '{"hooks":{}}\n' > "$hooks_file"
+        tmp="$(mktemp)"
+        jq --arg command "$codex_dir/hooks/branch-guard.sh" '
+            .hooks = (.hooks // {}) |
+            .hooks.PreToolUse = (.hooks.PreToolUse // []) |
+            if ([.hooks.PreToolUse[]?.hooks[]?.command] | index($command))
+            then .
+            else .hooks.PreToolUse += [{hooks: [{type: "command", command: $command, timeout: 10}]}]
+            end
+        ' "$hooks_file" > "$tmp" && mv "$tmp" "$hooks_file"
+        echo "    wired. Codex will request hook trust on first use."
+    fi
     echo "done. Start a new Codex CLI session to use the installed skills."
 }
 

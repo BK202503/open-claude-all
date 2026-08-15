@@ -2,6 +2,9 @@
 name: react-hooks-review
 description: Review React (functional component + hooks) code before you PR for common regressions. `useEffect` dependency-array bugs, stale closures in event handlers, `useState` set-with-stale-value, over-memoization, list `key` anti-patterns, async effect cleanup leaks, and Rules-of-Hooks violations that a lint pass missed. Triggers include "review this React code", "check my hooks", "why does my effect run twice", "am I using useMemo right".
 version: 0.1.0
+context: fork
+agent: diff-scoped-reviewer
+background: false
 ---
 
 # react-hooks-review

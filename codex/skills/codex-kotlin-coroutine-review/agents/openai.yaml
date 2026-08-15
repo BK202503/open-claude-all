@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Kotlin Coroutine Review"
+  short_description: "Find coroutine lifecycle and dispatcher risks in changed Kotlin."
+  default_prompt: "Use $codex-kotlin-coroutine-review to review changed Kotlin coroutine code."

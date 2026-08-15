@@ -15,7 +15,6 @@ npx open-claude-all
 Restart Claude Code after install, then run `/status` to confirm skills are active.
 
 Other install paths:
-
 | Path | Command |
 | --- | --- |
 | Plugin marketplace | `/plugin marketplace add BK202503/open-claude-all` |
@@ -23,6 +22,27 @@ Other install paths:
 | Git clone | `git clone https://github.com/BK202503/open-claude-all.git ~/.open-claude-all && ~/.open-claude-all/install.sh` |
 
 To pin a version: `npx open-claude-all@0.1.3`
+
+### Codex CLI
+
+Install only the Codex CLI assets without changing Claude Code settings:
+
+```sh
+npx open-claude-all --target codex
+```
+
+Install both CLIs explicitly:
+
+```sh
+npx open-claude-all --target both
+```
+
+Claude Code assets install under `~/.claude`; Codex CLI assets install under
+`${CODEX_HOME:-~/.codex}`. They do not share settings, hooks, or skills.
+
+Codex CLI support currently includes `codex-project-policy`, `codex-review`,
+`codex-pr-impact-scan`, and the JVM, Kotlin coroutine, Spring Kafka, React,
+Next.js, and NestJS reviewers. Invoke a skill with `$skill-name` in Codex.
 
 
 ## What's inside
@@ -79,6 +99,7 @@ Run `/review` and the skills below chain together automatically.
 | --- | --- |
 | `pr-reviewer` | Checks scope discipline, impact enumeration, and commit hygiene in one shot. Ranks findings Blocker / Watch / Nit. |
 | `pr-impact-runner` | Takes a PR URL, runs `pr-impact-scan`, returns a compact ranked report. |
+| `diff-scoped-reviewer` | Read-only agent used via `context: fork` by the language-specific review skills. Determines its own diff scope (base branch → changed files → matching extensions) before applying the invoking skill's checklist, so it never scans the whole repo and can't modify the code it's reviewing. |
 
 
 ## Configuration

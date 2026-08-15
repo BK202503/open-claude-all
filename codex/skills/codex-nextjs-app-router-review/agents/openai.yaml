@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Next.js App Router Review"
+  short_description: "Find App Router regressions in changed Next.js code."
+  default_prompt: "Use $codex-nextjs-app-router-review to review changed Next.js App Router code."

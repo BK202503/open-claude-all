@@ -2,6 +2,9 @@
 name: nextjs-app-router-review
 description: Review Next.js App Router code before you PR for common regressions. Server/client component boundary mistakes, `fetch` cache/revalidate misuse, `params`/`searchParams` async in Next 15+, server-only secrets leaking into client bundles, hydration mismatches, and route handler pitfalls. Triggers include "review this Next.js code", "check my app router page", "why is my page hydrating twice", "server component review".
 version: 0.1.0
+context: fork
+agent: diff-scoped-reviewer
+background: false
 ---
 
 # nextjs-app-router-review
