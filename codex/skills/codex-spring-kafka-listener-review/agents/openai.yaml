@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Spring Kafka Review"
+  short_description: "Find listener retry, ack, and DLT risks in changed code."
+  default_prompt: "Use $codex-spring-kafka-listener-review to review changed Kafka listener code."
